@@ -10,33 +10,78 @@ const fs = require('fs');
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
 
-// 先导入fs模块，然后用readdirSync列出文件
-// 这里可以用sync是因为启动时只运行一次，不存在性能问题:
-let files = fs.readdirSync(__dirname + '/controllers');
-// 过滤出.js文件:
-let js_files = files.filter((f) => {
-    return f.endsWith('.js');
-});
-// 处理每个js文件:
-for (const f of js_files) {
-    console.log(`js文件: ${f}...`);
-    // 导入js文件:
-    let mapping = require(__dirname + '/controllers/' + f);
-    for (const url in mapping) {
+// // 先导入fs模块，然后用readdirSync列出文件
+// // 这里可以用sync是因为启动时只运行一次，不存在性能问题:
+// let files = fs.readdirSync(__dirname + '/controllers');
+// // 过滤出.js文件:
+// let js_files = files.filter((f) => {
+//     return f.endsWith('.js');
+// });
+// // 处理每个js文件:
+// for (const f of js_files) {
+//     console.log(`js文件: ${f}...`);
+//     // 导入js文件:
+//     let mapping = require(__dirname + '/controllers/' + f);
+//     for (const url in mapping) {
+//         if (url.startsWith('GET ')) {
+//             // 如果url类似"GET xxx":
+//             let path = url.substring(4);
+//             router.get(path, mapping[url]);
+//         } else if (url.startsWith('POST ')) {
+//             // 如果url类似"POST xxx":
+//             let path = url.substring(5);
+//             router.post(path, mapping[url]);
+//         } else {
+//             // 无效的URL:
+//             console.log(`invalid URL: ${url}`);
+//         }
+//     }
+// }
+
+/**
+ * 绑定路由
+ * @param {*} router 要绑定的路由
+ * @param {*} mapping 要绑定的方法{路由path:方法,...}
+ */
+function addMapping(router, mapping) {
+    for (var url in mapping) {
         if (url.startsWith('GET ')) {
-            // 如果url类似"GET xxx":
-            let path = url.substring(4);
+            var path = url.substring(4);
             router.get(path, mapping[url]);
+            console.log(`register URL mapping: GET ${path}`);
         } else if (url.startsWith('POST ')) {
-            // 如果url类似"POST xxx":
-            let path = url.substring(5);
+            var path = url.substring(5);
             router.post(path, mapping[url]);
+            console.log(`register URL mapping: POST ${path}`);
         } else {
-            // 无效的URL:
             console.log(`invalid URL: ${url}`);
         }
     }
 }
+
+/**
+ * 过滤js文件、导入js文件
+ * @param {*} router 路由的实列
+ */
+function addControllers(router) {
+    // 先导入fs模块，然后用readdirSync列出文件
+    // 这里可以用sync是因为启动时只运行一次，不存在性能问题:
+    var files = fs.readdirSync(__dirname + '/controllers');
+    // 过滤出.js文件:
+    var js_files = files.filter((f) => {
+        return f.endsWith('.js');
+    });
+
+    // 处理每个js文件:
+    for (var f of js_files) {
+        console.log(`process controller: ${f}...`);
+        // 导入js文件
+        let mapping = require(__dirname + '/controllers/' + f);
+        addMapping(router, mapping);
+    }
+}
+
+addControllers(router);
 
 // 对于任何请求，app将调用该异步函数处理请求：
 app.use(async (ctx, next) => {
