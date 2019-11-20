@@ -1,6 +1,6 @@
+// 扫描注册Controller
 // 文件系统模块
 const fs = require('fs');
-
 
 /**
  * 绑定路由
