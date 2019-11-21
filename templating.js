@@ -27,20 +27,29 @@ function createEnv(path, opts) {
     return env;
 }
 
-function templating(path, opts) {
-    // 创建Nunjucks的env对象:
-    var env = createEnv(path, opts);
-    return async (ctx, next) => {
-        // 给ctx绑定render函数:
-        ctx.render = function (view, model) {
-            // 把render后的内容赋值给response.body:
-            ctx.response.body = env.render(view, Object.assign({}, ctx.state || {}, model || {}));
-            // 设置Content-Type:
-            ctx.response.type = 'text/html';
-        };
-        // 继续处理请求:
-        await next();
-    };
+// function templating(path, opts) {
+//     // 创建Nunjucks的env对象:
+//     var env = createEnv(path, opts);
+//     return async (ctx, next) => {
+//         // 给ctx绑定render函数:
+//         ctx.render = function (view, model) {
+//             // 把render后的内容赋值给response.body:
+//             ctx.response.body = env.render(view, Object.assign({}, ctx.state || {}, model || {}));
+//             // 设置Content-Type:
+//             ctx.response.type = 'text/html';
+//         };
+//         // 继续处理请求:
+//         await next();
+//     };
+// }
+
+function templating(path, opts, app) {
+    let env = createEnv(path, opts);
+    //app.context为ctx的原型
+    app.context.render = function (view, model) {
+        this.response.body = env.render(view, Object.assign({}, this.state || {}, model || {}));
+        this.response.type = 'text/html';
+    }
 }
 
 module.exports = templating;

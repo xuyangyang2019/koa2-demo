@@ -51,10 +51,14 @@ app.use(bodyParser());
 // 如果是开发环境，就使用缓存，如果不是，就关闭缓存
 // 在开发环境下，关闭缓存后，我们修改View，可以直接刷新浏览器看到效果，
 // 否则，每次修改都必须重启Node程序，会极大地降低开发效率。
-app.use(templating('views', {
+// app.use(templating('views', {
+//     noCache: !isProduction,
+//     watch: !isProduction
+// }));
+templating('views', {
     noCache: !isProduction,
     watch: !isProduction
-}));
+}, app);
 
 // 最后一个middleware处理URL路由：
 // 使用middleware:创建、绑定router
