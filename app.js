@@ -37,23 +37,21 @@ var env = createEnv('views', {
     }
 });
 
-var s = env.render('hello.html', { name: '小明' });
+// var s = env.render('hello.html', { name: '小明' });
 // 模板可以防止xss攻击
 // var s = env.render('hello.html', { name: '<script>alert("小明")</script>' });
 // http://mozilla.github.io/nunjucks/getting-started.html
 // console.log(s);
-
 // var s = env.render('hello.html', {
 //     name: '<Nunjucks>',
 //     fruits: ['Apple', 'Pear', 'Banana'],
 //     count: 12000
 // });
 // console.log(s);
-
-console.log(env.render('extend.html', {
-    header: 'Hello',
-    body: 'bla bla bla...'
-}));
+// console.log(env.render('extend.html', {
+//     header: 'Hello',
+//     body: 'bla bla bla...'
+// }));
 
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
