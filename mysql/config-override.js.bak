@@ -1,0 +1,11 @@
+// 存储特定的配置 配置后生效
+var config = {
+    dialect: 'mysql',
+    database: 'test',
+    username: 'test',
+    password: 'test',
+    host: 'localhost',
+    port: 3306
+};
+
+module.exports = config;
