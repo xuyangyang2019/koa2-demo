@@ -16,7 +16,7 @@ module.exports = {};
  * 自动导入models下的所有js
  */
 for (let f of js_files) {
-    console.log(`import model from file ${f}...`);
+    // console.log(`import model from file ${f}...`);
     let name = f.substring(0, f.length - 3);
     module.exports[name] = require(__dirname + '/models/' + f);
 }
