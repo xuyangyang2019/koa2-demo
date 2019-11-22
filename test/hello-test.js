@@ -1,23 +1,23 @@
 const assert = require('assert');
-const sum = require('../hello');
+const sum = require('../hello-test/hello');
 
 describe('#hello.js', () => {
     describe('#sum()', () => {
-        before(function () {
-            console.log('before:');
-        });
+        // before(function () {
+        //     console.log('before:');
+        // });
 
-        after(function () {
-            console.log('after.');
-        });
+        // after(function () {
+        //     console.log('after.');
+        // });
 
-        beforeEach(function () {
-            console.log('  beforeEach:');
-        });
+        // beforeEach(function () {
+        //     console.log('  beforeEach:');
+        // });
 
-        afterEach(function () {
-            console.log('  afterEach.');
-        });
+        // afterEach(function () {
+        //     console.log('  afterEach.');
+        // });
 
         it('sum() should return 0', () => {
             assert.strictEqual(sum(), 0);
