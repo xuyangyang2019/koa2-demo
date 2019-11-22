@@ -8,18 +8,18 @@ describe('#test koa app', () => {
 
     describe('#test server', () => {
 
-        it('#test GET /', async () => {
+        it('#test GET /hello/xyy', async () => {
             let res = await request(server)
-                .get('/')
+                .get('/hello/xyy')
                 .expect('Content-Type', /text\/html/)
-                .expect(200, '<h1>Hello, world!</h1>');
+                .expect(200, '<h1>Hello, xyy!</h1>');
         });
 
-        it('#test GET /path?name=Bob', async () => {
-            let res = await request(server)
-                .get('/path?name=Bob')
-                .expect('Content-Type', /text\/html/)
-                .expect(200, '<h1>Hello, Bob!</h1>');
-        });
+        // it('#test GET /path?name=Bob', async () => {
+        //     let res = await request(server)
+        //         .get('/path?name=Bob')
+        //         .expect('Content-Type', /text\/html/)
+        //         .expect(200, '<h1>Hello, Bob!</h1>');
+        // });
     });
 });
