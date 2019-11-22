@@ -6,6 +6,19 @@ const bodyParser = require('koa-bodyparser'); // 解析原始request请求
 const controller = require('./controller'); // 自动导入controller:
 const templating = require('./templating'); // ctx添加render方法，绑定Nunjucks模板
 
+// // mysql
+// const model = require('./model');
+// let User = model.User;
+// (async () => {
+//     var user = await User.create({
+//         name: 'Xuyy',
+//         gender: false,
+//         email: 'Xuyy@jubotech.com',
+//         passwd: '123456'
+//     });
+//     console.log('created: ' + JSON.stringify(user));
+// })();
+
 // 判断当前环境是否是production环境 production development
 const isProduction = process.env.NODE_ENV === 'production';
 // 创建一个Koa对象表示web app本身:
