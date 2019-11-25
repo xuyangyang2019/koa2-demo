@@ -55,7 +55,7 @@
             if ("WebSocket" in window) {
                 // 打开一个 web socket
                 console.log("您的浏览器支持 WebSocket!")
-                var ws = new WebSocket("ws://localhost:3001/test");
+                var ws = new WebSocket("ws://localhost:3000/ws/chat");
 
                 ws.onopen = function () {
                     console.log(`[CLIENT] open()`);
