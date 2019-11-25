@@ -1,3 +1,4 @@
+// 处理静态文件
 // 处理以/static/开头的URL
 const path = require('path');
 const mime = require('mime');
