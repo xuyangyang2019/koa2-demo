@@ -1,34 +1,32 @@
-const model = require('../model');
-let User = model.User;
+// sign in:
 
-let fn_signin = async (ctx, next) => {
-    let
-        email = ctx.request.body.email || '',
-        password = ctx.request.body.password || '';
-
-    var users = await User.findAll({
-        where: {
-            email: email,
-            passwd: password
-        }
-    });
-    // user应该保证唯一性
-    // console.log(`find ${users.length} users:`);
-    if (users.length > 0) {
-        // console.log('signin ok!');
-        let currentUser = users[0]
-        ctx.render('signin-ok.html', {
-            title: 'Sign In OK',
-            name: currentUser.name
-        });
-    } else {
-        // console.log('signin failed!');
-        ctx.render('signin-failed.html', {
-            title: 'Sign In Failed'
-        });
-    }
-};
+var index = 0;
 
 module.exports = {
-    'POST /signin': fn_signin
+    'GET /signin': async (ctx, next) => {
+        let names = '甲乙丙丁戊己庚辛壬癸';
+        let name = names[index % 10];
+        ctx.render('signinVue.html', {
+            name: `路人${name}`
+        });
+    },
+
+    'POST /signin': async (ctx, next) => {
+        index++;
+        let name = ctx.request.body.name || '路人甲';
+        let user = {
+            id: index,
+            name: name,
+            image: index % 10
+        };
+        let value = Buffer.from(JSON.stringify(user)).toString('base64');
+        console.log(`Set cookie value: ${value}`);
+        ctx.cookies.set('name', value);
+        ctx.response.redirect('/');
+    },
+
+    'GET /signout': async (ctx, next) => {
+        ctx.cookies.set('name', '');
+        ctx.response.redirect('/signin');
+    }
 };

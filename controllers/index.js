@@ -1,9 +1,14 @@
-var fn_index = async (ctx, next) => {
-    ctx.render('index.html', {
-        title: 'Welcome'
-    });
-};
+// index:
 
 module.exports = {
-    'GET /': fn_index
+    'GET /': async (ctx, next) => {
+        let user = ctx.state.user;
+        if (user) {
+            ctx.render('roomVue.html', {
+                user: user
+            });
+        } else {
+            ctx.response.redirect('/signin');
+        }
+    }
 };
