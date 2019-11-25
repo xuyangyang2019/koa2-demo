@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+
+
+</head>
+
+<body>
+    <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+    <!-- <button id='btn'>WebSocket</button>
+    <button id='btn2'>WebSocket2</button> -->
+    <!-- <button id='btn3' onclick="connectWS()">WebSocketTest</button> -->
+    <a href="javascript:WebSocketTest()">运行 WebSocket</a>
+
+    <!-- <script src="" async defer> -->
+    <script async defer>
+        // var btn = document.getElementById("btn");
+        // var btn2 = document.getElementById("btn2");
+        // 第一种 通过点击事件
+        // btn.onclick = function () {
+        //     alert("这是第一种点击方式");
+        // }
+        // 第二种 监听点击事件
+        // btn2.addEventListener('click', function () {
+        //     alert("这是第二中点击方式");
+        // })
+        // 第三种 通过方法响应点击事件
+        // 打开一个WebSocket:
+        // function connectWS() {
+        //     console.log('websocket测试')
+        //     let ws = new WebSocket('ws://localhost:3001/test');
+        //     // 响应onmessage事件:
+        //     ws.onmessage = function (msg) {
+        //         console.log(msg);
+        //     };
+        //     // 给服务器发送一个字符串:
+        //     ws.send('Hello!');
+        // }
+
+        function WebSocketTest() {
+            if ("WebSocket" in window) {
+                // 打开一个 web socket
+                console.log("您的浏览器支持 WebSocket!")
+                var ws = new WebSocket("ws://localhost:3001/test");
+
+                ws.onopen = function () {
+                    console.log(`[CLIENT] open()`);
+                    ws.send('Hello!');
+                };
+
+                ws.onmessage = function (evt) {
+                    var received_msg = evt.data;
+                    // console.log('数据已接收...')
+                    // console.log(received_msg)
+                    console.log(`[CLIENT] Received: ${received_msg}`);
+                };
+
+                ws.onclose = function () {
+                    // 关闭 websocket
+                    console.log("连接已关闭...")
+                };
+            }
+            else {
+                // 浏览器不支持 WebSocket
+                alert("您的浏览器不支持 WebSocket!");
+            }
+        }
+    </script>
+</body>
+
+</html>
