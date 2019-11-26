@@ -2,17 +2,17 @@
 // 导入koa，和koa 1.x不同，在koa2中，我们导入的是一个class，因此用大写的Koa表示:
 const Koa = require('koa');
 const bodyParser = require('koa-bodyparser'); // 解析原始request请求
+
 const controller = require('./controller'); // 自动导入controller:
 const templating = require('./templating'); // ctx添加render方法，绑定Nunjucks模板
+
+// ==================== rest =========================
+const rest = require('./middleware/rest');
 
 // ================websocket=========================
 const ws = require('ws');
 const url = require('url');
 const Cookies = require('cookies');
-
-// ==================== rest =========================
-const rest = require('./rest');
-
 
 // // mysql
 // const model = require('./model');

@@ -1,4 +1,4 @@
-const APIError = require('../rest').APIError;
+const APIError = require('../middleware/rest').APIError;
 
 var gid = 0;
 
