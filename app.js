@@ -80,7 +80,7 @@ let server = app.listen(3000);
 
 // 识别用户
 function parseUser(obj) {
-    console.log('识别用户')
+    // console.log('识别用户')
     if (!obj) {
         return;
     }
