@@ -10,6 +10,10 @@ const ws = require('ws');
 const url = require('url');
 const Cookies = require('cookies');
 
+// ==================== rest =========================
+const rest = require('./rest');
+
+
 // // mysql
 // const model = require('./model');
 // let User = model.User;
@@ -64,6 +68,9 @@ templating('views', {
     noCache: !isProduction,
     watch: !isProduction
 }, app);
+
+// bind .rest() for ctx:
+app.use(rest.restify());
 
 // add controller middleware:
 app.use(controller());
