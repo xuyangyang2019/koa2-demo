@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>mmvm</title>
+    <!-- 引用jQuery -->
+    <script src="/static/js/jquery-3.4.1.min.js"></script>
+    <!-- 引用Vue -->
+    <script src="/static/js/vue.min.js"></script>
+    <script>
+        // 初始化代码:
+        $(function () {
+            var vm = new Vue({
+                el: '#vm',
+                data: {
+                    name: 'Robot',
+                    age: 15,
+                    todos: [
+                        {
+                            name: '产品评审',
+                            description: '新款iPhone上市前评审'
+                        },
+                        {
+                            name: '开发计划',
+                            description: '与PM确定下一版Android开发计划'
+                        },
+                        {
+                            name: 'VC会议',
+                            description: '敲定C轮5000万美元融资'
+                        }
+                    ]
+                },
+                methods: {
+                    register: function () {
+                        // 显示JSON格式的Model:
+                        alert(JSON.stringify(this.$data));
+                        // TODO: AJAX POST...
+                    }
+                }
+            });
+            window.vm = vm;
+        });
+    </script>
+</head>
+
+<div id="vm">
+    <p>Hello, {{ name }}!</p>
+    <p @click='register()'>You are {{ age }} years old!</p>
+    <ol>
+        <li v-for="todo in todos">
+            <dt v-text="todo.name"></dt>
+            <dt v-text="todo.description"></dt>
+        </li>
+    </ol>
+</div>
+
+</html>

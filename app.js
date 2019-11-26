@@ -51,6 +51,7 @@ app.use(async (ctx, next) => {
 if (!isProduction) {
     let staticFiles = require('./static-files');
     app.use(staticFiles('/static/', __dirname + '/static'));
+    app.use(staticFiles('/dist/', __dirname + '/dist'));
 }
 
 // parse user from cookie:

@@ -17,6 +17,14 @@ function addMapping(router, mapping) {
             var path = url.substring(5);
             router.post(path, mapping[url]);
             console.log(`register URL mapping: POST ${path}`);
+        } else if (url.startsWith('PUT ')) {
+            var path = url.substring(4);
+            router.put(path, mapping[url]);
+            console.log(`register URL mapping: PUT ${path}`);
+        } else if (url.startsWith('DELETE ')) {
+            var path = url.substring(7);
+            router.del(path, mapping[url]);
+            console.log(`register URL mapping: DELETE ${path}`);
         } else {
             console.log(`invalid URL: ${url}`);
         }
@@ -48,7 +56,7 @@ function addControllers(router, controllers_dir) {
 
 module.exports = function (dir) {
     // 如果不传参数，扫描目录默认为'controllers'
-    let controllers_dir = dir || 'controllers'; 
+    let controllers_dir = dir || 'controllers';
     const router = require('koa-router')();
     addControllers(router, controllers_dir);
     return router.routes();

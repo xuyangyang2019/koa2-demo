@@ -1,51 +1,100 @@
-// REST API
 const APIError = require('../rest').APIError;
 
-// 存储Product列表，相当于模拟数据库:
-const products = require('../products');
-// var products = [{
-//     name: 'iPhone',
-//     price: 6999
-// }, {
-//     name: 'Kindle',
-//     price: 999
-// }];
+var gid = 0;
 
-module.exports = {  
-    'GET /api/products': async (ctx, next) => {
-        // 设置Content-Type:
-        // ctx.response.type = 'application/json';
-        // 设置Response Body:
-        // ctx.response.body = {
-        //     products: products
-        // };
+function nextId() {
+    gid++;
+    return 't' + gid;
+}
+
+var todos = [
+    {
+        id: nextId(),
+        name: 'Learn Git',
+        description: 'Learn how to use git as distributed version control'
+    },
+    {
+        id: nextId(),
+        name: 'Learn JavaScript',
+        description: 'Learn JavaScript, Node.js, NPM and other libraries'
+    },
+    {
+        id: nextId(),
+        name: 'Learn Python',
+        description: 'Learn Python, WSGI, asyncio and NumPy'
+    },
+    {
+        id: nextId(),
+        name: 'Learn Java',
+        description: 'Learn Java, Servlet, Maven and Spring'
+    }
+];
+
+module.exports = {
+    // 获取
+    'GET /api/todos': async (ctx, next) => {
         ctx.rest({
-            // products: products
-            products: products.getProducts()
+            todos: todos
         });
     },
-    
-    'POST /api/addProducts': async (ctx, next) => {
-        console.log('添加产品')
-        // var p = {
-        //     name: ctx.request.body.name,
-        //     price: ctx.request.body.price
-        // };
-        // products.push(p);
-        // ctx.response.type = 'application/json';
-        // ctx.response.body = p;
-
-        var p = products.createProduct(ctx.request.body.name, ctx.request.body.manufacturer, parseFloat(ctx.request.body.price));
-        ctx.rest(p);
+    // 新增
+    'POST /api/todos': async (ctx, next) => {
+        var
+            t = ctx.request.body,
+            todo;
+        if (!t.name || !t.name.trim()) {
+            throw new APIError('invalid_input', 'Missing name');
+        }
+        if (!t.description || !t.description.trim()) {
+            throw new APIError('invalid_input', 'Missing description');
+        }
+        todo = {
+            id: nextId(),
+            name: t.name.trim(),
+            description: t.description.trim()
+        };
+        todos.push(todo);
+        ctx.rest(todo);
+    },
+    // 更新
+    'PUT /api/todos/:id': async (ctx, next) => {
+        var
+            t = ctx.request.body,
+            index = -1,
+            i, todo;
+        if (!t.name || !t.name.trim()) {
+            throw new APIError('invalid_input', 'Missing name');
+        }
+        if (!t.description || !t.description.trim()) {
+            throw new APIError('invalid_input', 'Missing description');
+        }
+        for (i = 0; i < todos.length; i++) {
+            if (todos[i].id === ctx.params.id) {
+                index = i;
+                break;
+            }
+        }
+        if (index === -1) {
+            throw new APIError('notfound', 'Todo not found by id: ' + ctx.params.id);
+        }
+        todo = todos[index];
+        todo.name = t.name.trim();
+        todo.description = t.description.trim();
+        ctx.rest(todo);
     },
 
-    'DELETE /api/products/:id': async (ctx, next) => {
-        console.log(`delete product ${ctx.params.id}...`);
-        var p = products.deleteProduct(ctx.params.id);
-        if (p) {
-            ctx.rest(p);
-        } else {
-            throw new APIError('product:not_found', 'product not found by id.');
+    // 删除
+    'DELETE /api/todos/:id': async (ctx, next) => {
+        var i, index = -1;
+        for (i = 0; i < todos.length; i++) {
+            if (todos[i].id === ctx.params.id) {
+                index = i;
+                break;
+            }
         }
+        if (index === -1) {
+            throw new APIError('notfound', 'Todo not found by id: ' + ctx.params.id);
+        }
+        ctx.rest(todos.splice(index, 1)[0]);
     }
 }
