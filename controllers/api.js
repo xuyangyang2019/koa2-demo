@@ -1,5 +1,8 @@
 const APIError = require('../middleware/rest').APIError;
 
+// 存储Product列表，相当于模拟数据库:
+const products = require('../service/products');
+
 var gid = 0;
 
 function nextId() {
@@ -31,6 +34,12 @@ var todos = [
 ];
 
 module.exports = {
+    // 获取
+    'GET /api/products': async (ctx, next) => {
+        ctx.rest({
+            products: products.getProducts()
+        });
+    },
     // 获取
     'GET /api/todos': async (ctx, next) => {
         ctx.rest({
