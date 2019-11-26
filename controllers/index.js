@@ -1,5 +1,6 @@
 // MVC Controllers
 
+// 原始语法
 // let fn_hello = async (ctx, next) => {
 //     ctx.response.type = 'text/html';
 //     let name = ctx.request.query.name || 'world';
@@ -10,9 +11,9 @@
 //     'GET /hello/:name': fn_hello
 // };
 
-
+// Nunjucks 模板方法
 // let fn_index = async (ctx, next) => {
-//     ctx.render('index.html', {
+//     ctx.render('index.html', {N
 //         title: 'Welcome'
 //     });
 // };
@@ -33,7 +34,10 @@ module.exports = {
         //     ctx.response.redirect('/signin');
         // }
 
+        // mysql demo
+        // ctx.render('index.html');
+
         // rest demo
-        ctx.render('index.html');
+        ctx.render('indexVue.html');
     }
 };
