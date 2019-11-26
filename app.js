@@ -4,9 +4,7 @@ const Koa = require('koa');
 const bodyParser = require('koa-bodyparser'); // 解析原始request请求
 
 const controller = require('./controller'); // 自动导入controller:
-const templating = require('./templating'); // ctx添加render方法，绑定Nunjucks模板
-
-// ==================== rest =========================
+const templating = require('./middleware/templating'); // ctx添加render方法，绑定Nunjucks模板
 const rest = require('./middleware/rest');
 
 // ================websocket=========================
