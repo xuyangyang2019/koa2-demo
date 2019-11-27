@@ -3,8 +3,6 @@ const fs = require('fs');
 const db = require('./mysql/db');
 
 let files = fs.readdirSync(__dirname + '/models');
-
-
 let js_files = files.filter((f) => {
     return f.endsWith('.js');
 }, files);
@@ -23,5 +21,5 @@ for (let f of js_files) {
 
 // 调用Sequelize的方法自动生成表结构 
 module.exports.sync = () => {
-    db.sync();
+    return db.sync();
 };
