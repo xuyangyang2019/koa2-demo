@@ -47,7 +47,7 @@ app.use(async (ctx, next) => {
 
 // 测试环境下 解析静态文件；线上用ngix反向代理
 if (!isProduction) {
-    let staticFiles = require('./static-files');
+    let staticFiles = require('./middleware/static-files');
     app.use(staticFiles('/static/', __dirname + '/static'));
     app.use(staticFiles('/dist/', __dirname + '/dist'));
 }
