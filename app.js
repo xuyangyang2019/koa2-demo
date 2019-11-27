@@ -7,15 +7,34 @@ const controller = require('./middleware/controller'); // 扫描注册Controller
 const templating = require('./middleware/templating'); // ctx添加render方法，绑定Nunjucks模板
 const rest = require('./middleware/rest'); // rest中间件
 
-// ================websocket=========================
-const ws = require('ws');
-const url = require('url');
 const Cookies = require('cookies');
+// 识别用户
+function parseUser(obj) {
+    // console.log('识别用户')
+    if (!obj) {
+        return;
+    }
+    console.log('try parse: ' + obj);
+    let s = '';
+    if (typeof obj === 'string') {
+        s = obj;
+    } else if (obj.headers) {
+        let cookies = new Cookies(obj, null);
+        s = cookies.get('name');
+    }
+    if (s) {
+        try {
+            let user = JSON.parse(Buffer.from(s, 'base64').toString());
+            console.log(`User: ${user.name}, ID: ${user.id}`);
+            return user;
+        } catch (e) {
+            // ignore
+        }
+    }
+}
 
 // 判断当前环境是否是production环境 production development
 const isProduction = process.env.NODE_ENV === 'production';
-
-const WebSocketServer = ws.Server;
 
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
@@ -62,33 +81,12 @@ app.use(rest.restify());
 app.use(controller(__dirname + '/controllers'));
 
 // ================websocket=========================
+const ws = require('ws');
+const url = require('url');
 
+const WebSocketServer = ws.Server;
 let server = app.listen(3000);
 
-// 识别用户
-function parseUser(obj) {
-    // console.log('识别用户')
-    if (!obj) {
-        return;
-    }
-    console.log('try parse: ' + obj);
-    let s = '';
-    if (typeof obj === 'string') {
-        s = obj;
-    } else if (obj.headers) {
-        let cookies = new Cookies(obj, null);
-        s = cookies.get('name');
-    }
-    if (s) {
-        try {
-            let user = JSON.parse(Buffer.from(s, 'base64').toString());
-            console.log(`User: ${user.name}, ID: ${user.id}`);
-            return user;
-        } catch (e) {
-            // ignore
-        }
-    }
-}
 
 /**
  * 
