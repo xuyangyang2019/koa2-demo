@@ -36,10 +36,12 @@ function addMapping(router, mapping) {
  * @param {*} router 路由的实列
  * @param {*} controllers_dir js文件夹
  */
-function addControllers(router, controllers_dir) {
+function addControllers(router, controllers_path) {
     // 先导入fs模块，然后用readdirSync列出文件
     // 这里可以用sync是因为启动时只运行一次，不存在性能问题:
-    var files = fs.readdirSync(__dirname + `/${controllers_dir}`);
+    // var files = fs.readdirSync(__dirname + `/${controllers_dir}`);
+    var files = fs.readdirSync(controllers_path);
+
     // 过滤出.js文件:
     var js_files = files.filter((f) => {
         return f.endsWith('.js');
@@ -49,15 +51,16 @@ function addControllers(router, controllers_dir) {
     for (var f of js_files) {
         console.log(`process controller: ${f}...`);
         // 导入js文件
-        let mapping = require(__dirname + `/${controllers_dir}/` + f);
+        // let mapping = require(__dirname + `/${controllers_dir}/` + f);
+        let mapping = require(`${controllers_path}/` + f);
         addMapping(router, mapping);
     }
 }
 
-module.exports = function (dir) {
+module.exports = function (dir_path) {
     // 如果不传参数，扫描目录默认为'controllers'
-    let controllers_dir = dir || 'controllers';
+    let controllers_path = dir_path || 'controllers';
     const router = require('koa-router')();
-    addControllers(router, controllers_dir);
+    addControllers(router, controllers_path);
     return router.routes();
 };
