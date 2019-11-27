@@ -7,31 +7,10 @@ const controller = require('./middleware/controller'); // 扫描注册Controller
 const templating = require('./middleware/templating'); // ctx添加render方法，绑定Nunjucks模板
 const rest = require('./middleware/rest'); // rest中间件
 
-const Cookies = require('cookies');
-// 识别用户
-function parseUser(obj) {
-    // console.log('识别用户')
-    if (!obj) {
-        return;
-    }
-    console.log('try parse: ' + obj);
-    let s = '';
-    if (typeof obj === 'string') {
-        s = obj;
-    } else if (obj.headers) {
-        let cookies = new Cookies(obj, null);
-        s = cookies.get('name');
-    }
-    if (s) {
-        try {
-            let user = JSON.parse(Buffer.from(s, 'base64').toString());
-            console.log(`User: ${user.name}, ID: ${user.id}`);
-            return user;
-        } catch (e) {
-            // ignore
-        }
-    }
-}
+// const websocket = req
+const websocketServer = require('./websocket/websocketServer'); // rest中间件
+let parseUser = websocketServer.parseUser
+let createWebSocketServer = websocketServer.createWebSocketServer
 
 // 判断当前环境是否是production环境 production development
 const isProduction = process.env.NODE_ENV === 'production';
@@ -81,110 +60,9 @@ app.use(rest.restify());
 app.use(controller(__dirname + '/controllers'));
 
 // ================websocket=========================
-const ws = require('ws');
-const url = require('url');
 
-const WebSocketServer = ws.Server;
 let server = app.listen(3000);
-
-
-/**
- * 
- * @param {*} server http.Server
- * @param {*} onConnection 
- * @param {*} onMessage 
- * @param {*} onClose 
- * @param {*} onError 
- */
-function createWebSocketServer(server, onConnection, onMessage, onClose, onError) {
-    // 
-    let wss = new WebSocketServer({
-        server: server
-    });
-    // 
-    wss.broadcast = function broadcast(data) {
-        wss.clients.forEach(function each(client) {
-            client.send(data);
-        });
-    };
-    onConnection = onConnection || function () {
-        console.log('[WebSocket] connected.');
-    };
-    onMessage = onMessage || function (msg) {
-        console.log('[WebSocket] message received: ' + msg);
-    };
-    onClose = onClose || function (code, message) {
-        console.log(`[WebSocket] closed: ${code} - ${message}`);
-    };
-    onError = onError || function (err) {
-        console.log('[WebSocket] error: ' + err);
-    };
-    // wss.on('connection', function (ws) {
-    wss.on('connection', function (ws, req) {
-        ws.upgradeReq = req;
-        let location = url.parse(ws.upgradeReq.url, true);
-        console.log('[WebSocketServer] connection: ' + location.href);
-
-        ws.on('message', onMessage);
-        ws.on('close', onClose);
-        ws.on('error', onError);
-        // 如果请求的路径不对，关闭ws
-        if (location.pathname !== '/ws/chat') {
-            // close ws:
-            ws.close(4000, 'Invalid URL');
-        }
-        // 如果没有user,关闭ws
-        let user = parseUser(ws.upgradeReq);
-        if (!user) {
-            ws.close(4001, 'Invalid user');
-        }
-        ws.user = user;
-        ws.wss = wss;
-        onConnection.apply(ws);
-    });
-    console.log('WebSocketServer was attached.');
-    return wss;
-}
-
-// 消息id
-var messageIndex = 0;
-function createMessage(type, user, data) {
-    messageIndex++;
-    return JSON.stringify({
-        id: messageIndex,
-        type: type,
-        user: user,
-        data: data
-    });
-}
-
-function onConnect() {
-    let user = this.user;
-    let msg = createMessage('join', user, `${user.name} joined.`);
-    this.wss.broadcast(msg);
-    // build user list:
-    // let users = this.wss.clients.map(function (client) {
-    //     return client.user;
-    // });
-    let users = Array.from(this.wss.clients).map((client) => { return client.user });
-    this.send(createMessage('list', user, users));
-}
-
-function onMessage(message) {
-    console.log(message);
-    if (message && message.trim()) {
-        let msg = createMessage('chat', this.user, message.trim());
-        this.wss.broadcast(msg);
-    }
-}
-
-function onClose() {
-    let user = this.user;
-    let msg = createMessage('left', user, `${user.name} is left.`);
-    this.wss.broadcast(msg);
-}
-
-app.wss = createWebSocketServer(server, onConnect, onMessage, onClose);
+app.wss = createWebSocketServer(server);
 
 // module.exports = app;
 console.log('app started at port 3000...');
