@@ -3,9 +3,9 @@
 const Koa = require('koa');
 const bodyParser = require('koa-bodyparser'); // 解析原始request请求
 
-const controller = require('./middleware/controller'); // 自动导入controller:
+const controller = require('./middleware/controller'); // 扫描注册Controller，并添加router:
 const templating = require('./middleware/templating'); // ctx添加render方法，绑定Nunjucks模板
-const rest = require('./middleware/rest');
+const rest = require('./middleware/rest'); // rest中间件
 
 // ================websocket=========================
 const ws = require('ws');
@@ -20,7 +20,6 @@ const WebSocketServer = ws.Server;
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
 
-
 // 第一个middleware是记录URL以及页面执行时间：
 app.use(async (ctx, next) => {
     console.log(`Process ${ctx.request.method} ${ctx.request.url}...`);
@@ -34,6 +33,7 @@ app.use(async (ctx, next) => {
 
 // 测试环境下 解析静态文件；线上用ngix反向代理
 if (!isProduction) {
+    console.log('测试环境，使用static-files')
     let staticFiles = require('./middleware/static-files');
     app.use(staticFiles('/static/', __dirname + '/static'));
     app.use(staticFiles('/dist/', __dirname + '/dist'));
@@ -62,6 +62,7 @@ app.use(rest.restify());
 app.use(controller(__dirname + '/controllers'));
 
 // ================websocket=========================
+
 let server = app.listen(3000);
 
 // 识别用户

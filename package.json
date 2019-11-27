@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "mocha",
-    "start": "node --use_strict app.js"
+    "start": "set NODE_ENV=development&& node --use_strict app.js",
+    "build": "set NODE_ENV=production&& node --use_strict app.js"
   },
   "author": "xuyy (wechat:uta2012)",
   "license": "ISC",
