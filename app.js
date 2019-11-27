@@ -12,19 +12,6 @@ const ws = require('ws');
 const url = require('url');
 const Cookies = require('cookies');
 
-// // mysql
-// const model = require('./model');
-// let User = model.User;
-// (async () => {
-//     var user = await User.create({
-//         name: 'Xuyy',
-//         gender: false,
-//         email: 'Xuyy@jubotech.com',
-//         passwd: '123456'
-//     });
-//     console.log('created: ' + JSON.stringify(user));
-// })();
-
 // 判断当前环境是否是production环境 production development
 const isProduction = process.env.NODE_ENV === 'production';
 
