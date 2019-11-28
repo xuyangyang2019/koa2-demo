@@ -4,6 +4,7 @@ const Koa = require('koa');
 const bodyParser = require('koa-bodyparser'); // 解析原始request请求
 
 const controller = require('./middleware/controller'); // 扫描注册Controller，并添加router:
+
 const templating = require('./middleware/templating'); // ctx添加render方法，绑定Nunjucks模板
 const rest = require('./middleware/rest'); // rest中间件
 
@@ -57,14 +58,72 @@ templating('views', {
 // bind .rest() for ctx:
 app.use(rest.restify());
 
-// add controller middleware:
+// controller中间件
+// 自动扫描controllers文件夹中的js文件 
+// controllers中的js文件 导出模块方法{'GET /login':async (ctx,next)=>{},...}
+// 自动require js文件到 mapping = {'GET /login':async (ctx,next)=>{}}
+// 遍历每个mapping 自动添加router router.get(path, mapping[url])
 app.use(controller(__dirname + '/controllers'));
+
+// =========================================================
+// const router = require('koa-router')();
+// const fs = require('fs');
+
+// 自己添加
+// app.use(async (ctx, next) => {
+//     if (ctx.request.path === '/') {
+//         ctx.response.body = 'index page';
+//     } else {
+//         await next();
+//     }
+// });
+
+// 通过koa-router中间件控制路由
+// add url-route:
+// router.get('/hello/:name', async (ctx, next) => {
+//     var name = ctx.params.name;
+//     ctx.response.body = `<h1>Hello, ${name}!</h1>`;
+// });
+// router.get('/', async (ctx, next) => {
+//     ctx.response.body = '<h1>Index</h1>';
+// });
+
+// /**
+//  * 异步读取文件
+//  * @param {*} url 
+//  */
+// function read(url) {
+//     return new Promise((resolve, reject) => {
+//         fs.readFile(url, 'utf-8', function (err, data) {
+//             if (err) return reject(err);
+//         })
+//     })
+// }
+
+// vue-cli用到 所有的请求都指向index.html
+// router.get(/^\/[^\.]*$/, async (ctx, next) => {
+//     let path = __dirname + '/static/index2.html'
+//     // 构造解析 异步读取
+//     const { status, body } = await read(path);
+//     // 同步读取
+//     // body = fs.readFileSync(path, 'utf-8');
+//     ctx.state = status;
+//     ctx.type = 'text/html';
+//     ctx.body = body;
+// });
+
+// // add router middleware:
+// app.use(router.routes());
+
+// =========================================================
+
 
 // ================websocket=========================
 
-let server = app.listen(3000);
-app.wss = createWebSocketServer(server);
+// let server = app.listen(3000);
+// app.wss = createWebSocketServer(server);
 
 // module.exports = app;
+app.listen(3000)
 console.log('app started at port 3000...');
 
