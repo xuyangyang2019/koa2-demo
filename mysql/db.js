@@ -2,8 +2,9 @@
 const Sequelize = require('sequelize');
 // 生成唯一标识符
 const uuid = require('node-uuid');
-// mysql 配置文件
-const config = require('./config');
+
+// 配置文件
+const config = require('../config');
 
 /**
  * 生成唯一标识符
@@ -14,9 +15,10 @@ function generateId() {
 }
 
 // 创建一个sequelize对象实例
-var sequelize = new Sequelize(config.database, config.username, config.password, {
-    host: config.host,
-    dialect: config.dialect,
+var sequelize = new Sequelize(config.DB_NAME, config.DB_USER, config.DB_PASS, {
+    host: config.DB_HOST,
+    port: config.DB_PORT,
+    dialect: config.DB_DIALECT,
     pool: {
         max: 5,
         min: 0,
@@ -38,13 +40,14 @@ const ID_TYPE = Sequelize.STRING(50);
  * 
  * createdAt和updatedAt以BIGINT存储时间戳，最大的好处是无需处理时区，排序方便。version每次修改时自增。
  * 
- * @param {*} name 表明
+ * @param {*} name 表名
  * 
  * @param {*} attributes 列名
  * 
  * @returns sequelize 返回orm
  */
 function defineModel(name, attributes) {
+    console.log(name)
     var attrs = {};
     for (let key in attributes) {
         let value = attributes[key];
@@ -114,7 +117,9 @@ var exp = {
     sync: () => {
         // DDL: 数据定义语言
         // only allow create ddl in non-production environment:
-        if (process.env.NODE_ENV !== 'production') {
+        // if (process.env.NODE_ENV !== 'production') {
+        if (config.mode !== 'prod') {
+            console.log(`自动创建表结构${config.mode}`)
             return sequelize.sync({ force: true })
         } else {
             throw new Error('Cannot sync() when NODE_ENV is set to \'production\'.');

@@ -13,7 +13,8 @@ let parseUser = websocketServer.parseUser
 let createWebSocketServer = websocketServer.createWebSocketServer
 
 // 判断当前环境是否是production环境 production development
-const isProduction = process.env.NODE_ENV === 'production';
+const config = require('./config')
+const isProduction = config.mode === 'prod';
 
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
