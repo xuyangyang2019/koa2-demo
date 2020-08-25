@@ -22,13 +22,16 @@ const config = require('./config')
 const isProduction = config.mode === 'prod';
 
 // generator 中间件在koa v2中需要用koa-convert封装一下才能使用
-const convert = require('koa-convert')
-const loggerGenerator  = require('./middleware/logger-generator')
+// const convert = require('koa-convert')
+// const loggerGenerator  = require('./middleware/logger-generator')
+
+const loggerAsync  = require('./middleware/logger-async')
 
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
 
-app.use(convert(loggerGenerator()))
+// app.use(convert(loggerGenerator()))
+app.use(loggerAsync())
 
 // 第一个middleware是记录URL以及页面执行时间：
 // app.use(async (ctx, next) => {
