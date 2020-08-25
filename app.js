@@ -67,31 +67,31 @@ app.use(loggerAsync())
 // })
 
 // koa-router中间件
-// const Router = require('koa-router')
-// // 子路由1
-// let home = new Router()
-// home.get('/', async (ctx) => {
-//     let html = `
-//     <ul>
-//       <li><a href="/page/helloworld">/page/helloworld</a></li>
-//       <li><a href="/page/404">/page/404</a></li>
-//     </ul>
-//   `
-//     ctx.body = html
-// })
-// // 子路由2
-// let page = new Router()
-// page.get('/404', async (ctx) => {
-//     ctx.body = '404 page!'
-// }).get('/helloworld', async (ctx) => {
-//     ctx.body = 'helloworld page!'
-// })
-// // 装载所有子路由
-// let router = new Router()
-// router.use('/', home.routes(), home.allowedMethods())
-// router.use('/page', page.routes(), page.allowedMethods())
-// // 加载路由中间件
-// app.use(router.routes()).use(router.allowedMethods())
+const Router = require('koa-router')
+// 子路由1
+let home = new Router()
+home.get('/', async (ctx) => {
+    let html = `
+    <ul>
+      <li><a href="/page/helloworld">/page/helloworld</a></li>
+      <li><a href="/page/404">/page/404</a></li>
+    </ul>
+  `
+    ctx.body = html
+})
+// 子路由2
+let page = new Router()
+page.get('/404', async (ctx) => {
+    ctx.body = '404 page!'
+}).get('/helloworld', async (ctx) => {
+    ctx.body = 'helloworld page!'
+})
+// 装载所有子路由
+let router = new Router()
+router.use('/', home.routes(), home.allowedMethods())
+router.use('/page', page.routes(), page.allowedMethods())
+// 加载路由中间件
+app.use(router.routes()).use(router.allowedMethods())
 
 // GET请求数据获取
 // app.use(async (ctx) => {
@@ -114,9 +114,67 @@ app.use(loggerAsync())
 //     }
 // })
 
-// 解析出POST请求上下文中的表单数据 
+// // 解析出POST请求上下文中的表单数据 
+// app.use(async (ctx) => {
+//     if (ctx.url === '/pd' && ctx.method === 'GET') {
+//         // 当GET请求时候返回表单页面
+//         let html = `
+//     <h1>koa2 request post demo</h1>
+//     <form method="POST" action="/pd">
+//         <p>userName</p>
+//         <input name="userName" /><br/>
+//         <p>nickName</p>
+//         <input name="nickName" /><br/>
+//         <p>email</p>
+//         <input name="email" /><br/>
+//         <button type="submit">submit</button>
+//     </form>
+//     `
+//         ctx.body = html
+//     } else if (ctx.url === '/pd' && ctx.method === 'POST') {
+//         // 当POST请求的时候，解析POST表单里的数据，并显示出来
+//         let postData = await parsePostData(ctx)
+//         ctx.body = postData
+//     } else {
+//         // 其他请求显示404
+//         ctx.body = '<h1>404！！！ o(╯□╰)o</h1>'
+//     }
+// })
+// // 解析上下文里node原生请求的POST参数
+// function parsePostData(ctx) {
+//     return new Promise((resolve, reject) => {
+//         try {
+//             let postdata = "";
+//             ctx.req.addListener('data', (data) => {
+//                 postdata += data
+//             })
+//             ctx.req.addListener("end", function () {
+//                 let parseData = parseQueryStr(postdata)
+//                 resolve(parseData)
+//             })
+//         } catch (err) {
+//             reject(err)
+//         }
+//     })
+// }
+// // 将POST请求参数字符串解析成JSON
+// function parseQueryStr(queryStr) {
+//     let queryData = {}
+//     let queryStrList = queryStr.split('&')
+//     console.log(queryStrList)
+//     for (let [index, queryStr] of queryStrList.entries()) {
+//         let itemList = queryStr.split('=')
+//         queryData[itemList[0]] = decodeURIComponent(itemList[1])
+//     }
+//     return queryData
+// }
+
+// koa-bodyparser中间件可以把koa2上下文的formData数据解析到ctx.request.body中
+const bodyParser = require('koa-bodyparser');
+// 使用ctx.body解析中间件
+app.use(bodyParser())
 app.use(async (ctx) => {
-    if (ctx.url === '/' && ctx.method === 'GET') {
+    if (ctx.url === '/pd' && ctx.method === 'GET') {
         // 当GET请求时候返回表单页面
         let html = `
     <h1>koa2 request post demo</h1>
@@ -133,44 +191,14 @@ app.use(async (ctx) => {
         ctx.body = html
     } else if (ctx.url === '/' && ctx.method === 'POST') {
         // 当POST请求的时候，解析POST表单里的数据，并显示出来
-        let postData = await parsePostData(ctx)
+        let postData = ctx.request.body
         ctx.body = postData
     } else {
         // 其他请求显示404
         ctx.body = '<h1>404！！！ o(╯□╰)o</h1>'
     }
 })
-// 解析上下文里node原生请求的POST参数
-function parsePostData(ctx) {
-    return new Promise((resolve, reject) => {
-        try {
-            let postdata = "";
-            ctx.req.addListener('data', (data) => {
-                postdata += data
-            })
-            ctx.req.addListener("end", function () {
-                let parseData = parseQueryStr(postdata)
-                resolve(parseData)
-            })
-        } catch (err) {
-            reject(err)
-        }
-    })
-}
-// 将POST请求参数字符串解析成JSON
-function parseQueryStr(queryStr) {
-    let queryData = {}
-    let queryStrList = queryStr.split('&')
-    console.log(queryStrList)
-    for (let [index, queryStr] of queryStrList.entries()) {
-        let itemList = queryStr.split('=')
-        queryData[itemList[0]] = decodeURIComponent(itemList[1])
-    }
-    return queryData
-}
 
-// 解析原始request请求
-// const bodyParser = require('koa-bodyparser');
 
 // 扫描注册Controller，并添加router:
 // const controller = require('./middleware/controller');
