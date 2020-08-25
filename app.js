@@ -21,19 +21,41 @@ const bodyParser = require('koa-bodyparser');
 // 使用ctx.body解析中间件
 app.use(bodyParser())
 
+// 测试环境下 解析静态文件；线上用ngix反向代理
+// if (!isProduction) {
+//     console.log('测试环境，使用static-files')
+let staticFiles = require('./middleware/static-files');
+app.use(staticFiles('/static/', __dirname + '/static'));
+//     app.use(staticFiles('/dist/', __dirname + '/dist'));
+// }
+
 // koa-router中间件
 const Router = require('koa-router')
+const fs = require('fs');
+
+/**
+ * 用Promise封装异步读取文件方法
+ * @param  {string} page html文件名称
+ * @return {promise}      
+ */
+function render(page) {
+    return new Promise((resolve, reject) => {
+        let viewUrl = `./views/${page}`
+        fs.readFile(viewUrl, "binary", (err, data) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(data)
+            }
+        })
+    })
+}
+
 // 子路由1
 let home = new Router()
 home.get('/', async (ctx) => {
-    let html = `
-    <ul>
-      <li><a href="/page/helloworld">/page/helloworld</a></li>
-      <li><a href="/page/gd">/page/gd</a></li>
-      <li><a href="/page/pd">/page/pd</a></li>
-      <li><a href="/page/404">/page/404</a></li>
-    </ul>
-  `
+    let html = await render('demo.html')
+    console.log(html)
     ctx.body = html
 }).get('rd', async (ctx) => {
     let url = ctx.url
@@ -89,8 +111,6 @@ router.use('/page', page.routes(), page.allowedMethods())
 app.use(router.routes()).use(router.allowedMethods())
 
 
-// 扫描注册Controller，并添加router:
-// const controller = require('./middleware/controller');
 
 // ctx添加render方法，绑定Nunjucks模板
 // const templating = require('./middleware/templating');
@@ -118,13 +138,7 @@ app.use(router.routes()).use(router.allowedMethods())
 //     ctx.response.set('X-Response-Time', `${execTime}ms`);
 // });
 
-// 测试环境下 解析静态文件；线上用ngix反向代理
-// if (!isProduction) {
-//     console.log('测试环境，使用static-files')
-//     let staticFiles = require('./middleware/static-files');
-//     app.use(staticFiles('/static/', __dirname + '/static'));
-//     app.use(staticFiles('/dist/', __dirname + '/dist'));
-// }
+
 
 // parse user from cookie:
 // app.use(async (ctx, next) => {
@@ -145,49 +159,17 @@ app.use(router.routes()).use(router.allowedMethods())
 // bind .rest() for ctx:
 // app.use(rest.restify());
 
-// controller中间件
-// 自动扫描controllers文件夹中的js文件 
-// controllers中的js文件 导出模块方法{'GET /login':async (ctx,next)=>{},...}
-// 自动require js文件到 mapping = {'GET /login':async (ctx,next)=>{}}
-
-// 遍历每个mapping 自动添加router router.get(path, mapping[url])
+/**
+ * 自动扫描controllers文件夹中的js文件 
+ * controllers中的js文件 导出模块方法{'GET /login':async (ctx,next)=>{},...}
+ * 自动require js文件到 mapping = {'GET /login':async (ctx,next)=>{}}
+ * 遍历每个mapping 自动添加router router.get(path, mapping[url])
+ */
+// 扫描注册Controller，并添加router:
+// const controller = require('./middleware/controller');
 // app.use(controller(__dirname + '/controllers'));
 
 // =========================================================
-// const router = require('koa-router')();
-// const fs = require('fs');
-
-// 自己添加
-// app.use(async (ctx, next) => {
-//     if (ctx.request.path === '/') {
-//         ctx.response.body = 'index page';
-//     } else {
-//         await next();
-//     }
-// });
-
-// 通过koa-router中间件控制路由
-// add url-route:
-// router.get('/hello/:name', async (ctx, next) => {
-//     var name = ctx.params.name;
-//     ctx.response.body = `<h1>Hello, ${name}!</h1>`;
-// });
-// router.get('/', async (ctx, next) => {
-//     ctx.response.body = '<h1>Index</h1>';
-// });
-
-// /**
-//  * 异步读取文件
-//  * @param {*} url 
-//  */
-// function read(url) {
-//     return new Promise((resolve, reject) => {
-//         fs.readFile(url, 'utf-8', function (err, data) {
-//             if (err) return reject(err);
-//         })
-//     })
-// }
-
 // vue-cli用到 所有的请求都指向index.html
 // router.get(/^\/[^\.]*$/, async (ctx, next) => {
 //     let path = __dirname + '/static/index2.html'
