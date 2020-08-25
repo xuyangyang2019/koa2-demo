@@ -1,46 +1,22 @@
 // 创建app实例
 // 导入koa，和koa 1.x不同，在koa2中，我们导入的是一个class，因此用大写的Koa表示:
 const Koa = require('koa');
-const fs = require('fs')
-
-// generator 中间件在koa v2中需要用koa-convert封装一下才能使用
-// const convert = require('koa-convert')
-// const loggerGenerator  = require('./middleware/logger-generator')
-
-// async 中间件开发
-const loggerAsync = require('./middleware/logger-async')
-
-// koa-router中间件
-const Router = require('koa-router')
-
-// 解析原始request请求
-// const bodyParser = require('koa-bodyparser');
-
-// 扫描注册Controller，并添加router:
-// const controller = require('./middleware/controller');
-
-// ctx添加render方法，绑定Nunjucks模板
-// const templating = require('./middleware/templating');
-
-// rest中间件
-// const rest = require('./middleware/rest');
-
-// const websocket = req
-// const websocketServer = require('./websocket/websocketServer'); 
-// let parseUser = websocketServer.parseUser
-// let createWebSocketServer = websocketServer.createWebSocketServer
-
-// 判断当前环境是否是production环境 production development
-// const config = require('./config')
-// const isProduction = config.mode === 'prod';
 
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
 
+// generator中间件开发 
+// generator中间件在koa v2中需要用koa-convert封装一下才能使用
+// const convert = require('koa-convert')
+// const loggerGenerator  = require('./middleware/logger-generator')
 // app.use(convert(loggerGenerator()))
+
+// async中间件开发
+const loggerAsync = require('./middleware/logger-async')
 app.use(loggerAsync())
 
 // koa2 原生路由实现
+// const fs = require('fs')
 // /**
 //  * 用Promise封装异步读取文件方法
 //  * @param  {string} page html文件名称
@@ -58,7 +34,6 @@ app.use(loggerAsync())
 //         })
 //     })
 // }
-
 // /**
 // * 根据URL获取HTML内容
 // * @param  {string} url koa2上下文的url，ctx.url
@@ -92,8 +67,9 @@ app.use(loggerAsync())
 // })
 
 // koa-router中间件
-let home = new Router()
+const Router = require('koa-router')
 // 子路由1
+let home = new Router()
 home.get('/', async (ctx) => {
     let html = `
     <ul>
@@ -117,6 +93,48 @@ router.use('/page', page.routes(), page.allowedMethods())
 // 加载路由中间件
 app.use(router.routes()).use(router.allowedMethods())
 
+// GET请求数据获取
+app.use(async (ctx) => {
+    let url = ctx.url
+    // 从上下文的request对象中获取
+    let request = ctx.request
+    let req_query = request.query
+    let req_querystring = request.querystring
+
+    // 从上下文中直接获取
+    let ctx_query = ctx.query
+    let ctx_querystring = ctx.querystring
+
+    ctx.body = {
+        url,
+        req_query,
+        req_querystring,
+        ctx_query,
+        ctx_querystring
+    }
+})
+
+
+// 解析原始request请求
+// const bodyParser = require('koa-bodyparser');
+
+// 扫描注册Controller，并添加router:
+// const controller = require('./middleware/controller');
+
+// ctx添加render方法，绑定Nunjucks模板
+// const templating = require('./middleware/templating');
+
+// rest中间件
+// const rest = require('./middleware/rest');
+
+// const websocket = req
+// const websocketServer = require('./websocket/websocketServer'); 
+// let parseUser = websocketServer.parseUser
+// let createWebSocketServer = websocketServer.createWebSocketServer
+
+// 判断当前环境是否是production环境 production development
+// const config = require('./config')
+// const isProduction = config.mode === 'prod';
 
 // 第一个middleware是记录URL以及页面执行时间：
 // app.use(async (ctx, next) => {
