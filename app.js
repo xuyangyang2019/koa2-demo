@@ -15,12 +15,25 @@ const app = new Koa();
 const loggerAsync = require('./middleware/logger-async')
 app.use(loggerAsync())
 
-// koa-bodyparser必须在router之前被注册到app对象上
-// koa-bodyparser中间件可以把koa2上下文的formData数据解析到ctx.request.body中
-const bodyParser = require('koa-bodyparser');
-// 使用ctx.body解析中间件
-app.use(bodyParser())
 
+// ctx添加render方法，绑定Nunjucks模板
+// const templating = require('./middleware/templating');
+
+// rest中间件
+// const rest = require('./middleware/rest');
+
+// koa-static中间件使用
+// const path = require('path')
+// const static = require('koa-static')
+// // 静态资源目录对于相对入口文件index.js的路径
+// const staticPath = './static'
+// app.use(static(
+//     path.join(__dirname, staticPath)
+// ))
+
+// 判断当前环境是否是production环境 production development
+// const config = require('./config')
+// const isProduction = config.mode === 'prod';
 // 测试环境下 解析静态文件；线上用ngix反向代理
 // if (!isProduction) {
 //     console.log('测试环境，使用static-files')
@@ -28,6 +41,30 @@ let staticFiles = require('./middleware/static-files');
 app.use(staticFiles('/static/', __dirname + '/static'));
 //     app.use(staticFiles('/dist/', __dirname + '/dist'));
 // }
+
+
+
+// parse user from cookie:
+// app.use(async (ctx, next) => {
+//     console.log('parse user from cookie')
+//     ctx.state.user = parseUser(ctx.cookies.get('name') || '');
+//     await next();
+// });
+
+// koa-bodyparser必须在router之前被注册到app对象上
+// koa-bodyparser中间件可以把koa2上下文的formData数据解析到ctx.request.body中
+const bodyParser = require('koa-bodyparser');
+// 使用ctx.body解析中间件
+app.use(bodyParser())
+
+// add nunjucks as view:
+// templating('views', {
+//     noCache: !isProduction,
+//     watch: !isProduction
+// }, app);
+
+// bind .rest() for ctx:
+// app.use(rest.restify());
 
 // koa-router中间件
 const Router = require('koa-router')
@@ -50,7 +87,6 @@ function render(page) {
         })
     })
 }
-
 // 子路由1
 let home = new Router()
 home.get('/', async (ctx) => {
@@ -112,52 +148,12 @@ app.use(router.routes()).use(router.allowedMethods())
 
 
 
-// ctx添加render方法，绑定Nunjucks模板
-// const templating = require('./middleware/templating');
-
-// rest中间件
-// const rest = require('./middleware/rest');
 
 // const websocket = req
 // const websocketServer = require('./websocket/websocketServer'); 
 // let parseUser = websocketServer.parseUser
 // let createWebSocketServer = websocketServer.createWebSocketServer
 
-// 判断当前环境是否是production环境 production development
-// const config = require('./config')
-// const isProduction = config.mode === 'prod';
-
-// 第一个middleware是记录URL以及页面执行时间：
-// app.use(async (ctx, next) => {
-//     console.log(`Process ${ctx.request.method} ${ctx.request.url}...`);
-//     var
-//         start = new Date().getTime(),
-//         execTime;
-//     await next();
-//     execTime = new Date().getTime() - start;
-//     ctx.response.set('X-Response-Time', `${execTime}ms`);
-// });
-
-
-
-// parse user from cookie:
-// app.use(async (ctx, next) => {
-//     console.log('parse user from cookie')
-//     ctx.state.user = parseUser(ctx.cookies.get('name') || '');
-//     await next();
-// });
-
-// parse request body:
-// app.use(bodyParser());
-
-// add nunjucks as view:
-// templating('views', {
-//     noCache: !isProduction,
-//     watch: !isProduction
-// }, app);
-
-// bind .rest() for ctx:
-// app.use(rest.restify());
 
 /**
  * 自动扫描controllers文件夹中的js文件 
