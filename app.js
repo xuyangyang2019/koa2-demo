@@ -1,15 +1,19 @@
 // 创建app实例
 // 导入koa，和koa 1.x不同，在koa2中，我们导入的是一个class，因此用大写的Koa表示:
 const Koa = require('koa');
-const bodyParser = require('koa-bodyparser'); // 解析原始request请求
+// 解析原始request请求
+const bodyParser = require('koa-bodyparser'); 
 
-const controller = require('./middleware/controller'); // 扫描注册Controller，并添加router:
+// 扫描注册Controller，并添加router:
+const controller = require('./middleware/controller'); 
 
-const templating = require('./middleware/templating'); // ctx添加render方法，绑定Nunjucks模板
-const rest = require('./middleware/rest'); // rest中间件
+// ctx添加render方法，绑定Nunjucks模板
+const templating = require('./middleware/templating'); 
+// rest中间件
+const rest = require('./middleware/rest'); 
 
 // const websocket = req
-const websocketServer = require('./websocket/websocketServer'); // rest中间件
+const websocketServer = require('./websocket/websocketServer'); 
 let parseUser = websocketServer.parseUser
 let createWebSocketServer = websocketServer.createWebSocketServer
 
@@ -17,19 +21,25 @@ let createWebSocketServer = websocketServer.createWebSocketServer
 const config = require('./config')
 const isProduction = config.mode === 'prod';
 
+// generator 中间件在koa v2中需要用koa-convert封装一下才能使用
+const convert = require('koa-convert')
+const loggerGenerator  = require('./middleware/logger-generator')
+
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
 
+app.use(convert(loggerGenerator()))
+
 // 第一个middleware是记录URL以及页面执行时间：
-app.use(async (ctx, next) => {
-    console.log(`Process ${ctx.request.method} ${ctx.request.url}...`);
-    var
-        start = new Date().getTime(),
-        execTime;
-    await next();
-    execTime = new Date().getTime() - start;
-    ctx.response.set('X-Response-Time', `${execTime}ms`);
-});
+// app.use(async (ctx, next) => {
+//     console.log(`Process ${ctx.request.method} ${ctx.request.url}...`);
+//     var
+//         start = new Date().getTime(),
+//         execTime;
+//     await next();
+//     execTime = new Date().getTime() - start;
+//     ctx.response.set('X-Response-Time', `${execTime}ms`);
+// });
 
 // 测试环境下 解析静态文件；线上用ngix反向代理
 if (!isProduction) {
