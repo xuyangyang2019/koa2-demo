@@ -44,12 +44,7 @@ app.use(staticFiles('/static/', __dirname + '/static'));
 
 
 
-// parse user from cookie:
-// app.use(async (ctx, next) => {
-//     console.log('parse user from cookie')
-//     ctx.state.user = parseUser(ctx.cookies.get('name') || '');
-//     await next();
-// });
+
 
 // koa-bodyparser必须在router之前被注册到app对象上
 // koa-bodyparser中间件可以把koa2上下文的formData数据解析到ctx.request.body中
@@ -119,6 +114,21 @@ page.get('/404', async (ctx) => {
     ctx.body = 'helloworld page!'
 }).get('/gd', async (ctx) => {
     ctx.body = 'gd!'
+}).get('/ck', async (ctx) => {
+    ctx.cookies.set(
+        'cid',
+        'hello world',
+        {
+            domain: 'localhost',  // 写cookie所在的域名
+            path: '/index',       // 写cookie所在的路径
+            maxAge: 10 * 60 * 1000, // cookie有效时长
+            expires: new Date('2017-02-15'),  // cookie失效时间
+            httpOnly: false,  // 是否只用于http请求中获取
+            overwrite: false  // 是否允许重写
+        }
+    )
+    console.log(ctx.cookies)
+    ctx.body = 'cookie is ok'
 }).get('/pd', async (ctx) => {
     let html = `
     <h1>koa2 request post demo</h1>
@@ -149,10 +159,6 @@ app.use(router.routes()).use(router.allowedMethods())
 
 
 
-// const websocket = req
-// const websocketServer = require('./websocket/websocketServer'); 
-// let parseUser = websocketServer.parseUser
-// let createWebSocketServer = websocketServer.createWebSocketServer
 
 
 /**
@@ -181,8 +187,19 @@ app.use(router.routes()).use(router.allowedMethods())
 // // add router middleware:
 // app.use(router.routes());
 
+
 // =========================================================
 
+// const websocket = req
+// const websocketServer = require('./websocket/websocketServer'); 
+// let parseUser = websocketServer.parseUser
+// let createWebSocketServer = websocketServer.createWebSocketServer
+// parse user from cookie:
+// app.use(async (ctx, next) => {
+//     console.log('parse user from cookie')
+//     ctx.state.user = parseUser(ctx.cookies.get('name') || '');
+//     await next();
+// });
 
 // ================websocket=========================
 
