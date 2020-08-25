@@ -6,21 +6,24 @@ const fs = require('fs')
 // generator 中间件在koa v2中需要用koa-convert封装一下才能使用
 // const convert = require('koa-convert')
 // const loggerGenerator  = require('./middleware/logger-generator')
+
 // async 中间件开发
 const loggerAsync = require('./middleware/logger-async')
 
+// koa-router中间件
+const Router = require('koa-router')
 
 // 解析原始request请求
-const bodyParser = require('koa-bodyparser');
+// const bodyParser = require('koa-bodyparser');
 
 // 扫描注册Controller，并添加router:
-const controller = require('./middleware/controller');
+// const controller = require('./middleware/controller');
 
 // ctx添加render方法，绑定Nunjucks模板
-const templating = require('./middleware/templating');
+// const templating = require('./middleware/templating');
 
 // rest中间件
-const rest = require('./middleware/rest');
+// const rest = require('./middleware/rest');
 
 // const websocket = req
 // const websocketServer = require('./websocket/websocketServer'); 
@@ -31,64 +34,88 @@ const rest = require('./middleware/rest');
 // const config = require('./config')
 // const isProduction = config.mode === 'prod';
 
-/**
- * 用Promise封装异步读取文件方法
- * @param  {string} page html文件名称
- * @return {promise}      
- */
-function render(page) {
-    return new Promise((resolve, reject) => {
-        let viewUrl = `./views/${page}`
-        fs.readFile(viewUrl, "binary", (err, data) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve(data)
-            }
-        })
-    })
-}
-
-/**
-* 根据URL获取HTML内容
-* @param  {string} url koa2上下文的url，ctx.url
-* @return {string}     获取HTML文件内容
-*/
-async function route(url) {
-    let view = '404.html'
-    switch (url) {
-        case '/':
-            view = 'index.html'
-            break
-        case '/index':
-            view = 'index.html'
-            break
-        case '/todo':
-            view = 'todo.html'
-            break
-        case '/404':
-            view = '404.html'
-            break
-        default:
-            break
-    }
-    let html = await render(view)
-    return html
-}
-
-
-
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
 
 // app.use(convert(loggerGenerator()))
 app.use(loggerAsync())
 
-app.use(async (ctx) => {
-    let url = ctx.request.url
-    let html = await route(url)
+// koa2 原生路由实现
+// /**
+//  * 用Promise封装异步读取文件方法
+//  * @param  {string} page html文件名称
+//  * @return {promise}      
+//  */
+// function render(page) {
+//     return new Promise((resolve, reject) => {
+//         let viewUrl = `./views/${page}`
+//         fs.readFile(viewUrl, "binary", (err, data) => {
+//             if (err) {
+//                 reject(err)
+//             } else {
+//                 resolve(data)
+//             }
+//         })
+//     })
+// }
+
+// /**
+// * 根据URL获取HTML内容
+// * @param  {string} url koa2上下文的url，ctx.url
+// * @return {string}     获取HTML文件内容
+// */
+// async function route(url) {
+//     let view = '404.html'
+//     switch (url) {
+//         case '/':
+//             view = 'index.html'
+//             break
+//         case '/index':
+//             view = 'index.html'
+//             break
+//         case '/todo':
+//             view = 'todo.html'
+//             break
+//         case '/404':
+//             view = '404.html'
+//             break
+//         default:
+//             break
+//     }
+//     let html = await render(view)
+//     return html
+// }
+// app.use(async (ctx) => {
+//     let url = ctx.request.url
+//     let html = await route(url)
+//     ctx.body = html
+// })
+
+// koa-router中间件
+let home = new Router()
+// 子路由1
+home.get('/', async (ctx) => {
+    let html = `
+    <ul>
+      <li><a href="/page/helloworld">/page/helloworld</a></li>
+      <li><a href="/page/404">/page/404</a></li>
+    </ul>
+  `
     ctx.body = html
 })
+// 子路由2
+let page = new Router()
+page.get('/404', async (ctx) => {
+    ctx.body = '404 page!'
+}).get('/helloworld', async (ctx) => {
+    ctx.body = 'helloworld page!'
+})
+// 装载所有子路由
+let router = new Router()
+router.use('/', home.routes(), home.allowedMethods())
+router.use('/page', page.routes(), page.allowedMethods())
+// 加载路由中间件
+app.use(router.routes()).use(router.allowedMethods())
 
 
 // 第一个middleware是记录URL以及页面执行时间：
