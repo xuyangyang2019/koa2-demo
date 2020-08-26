@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path')
 
 // 创建app实例
@@ -6,6 +7,9 @@ const Koa = require('koa');
 
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
+// 判断当前环境是否是production环境 production development
+const config = require('./config')
+const isProduction = config.mode === 'prod';
 
 // generator中间件开发 
 // generator中间件在koa v2中需要用koa-convert封装一下才能使用
@@ -16,22 +20,6 @@ const app = new Koa();
 // async中间件开发
 const loggerAsync = require('./middleware/logger-async')
 app.use(loggerAsync())
-
-// 加载模板引擎
-const views = require('koa-views')
-app.use(views(path.join(__dirname, './views'), {
-    extension: 'ejs'
-}))
-
-app.use(async (ctx) => {
-    let title = 'hello koa2'
-    await ctx.render('index', {
-        title,
-    })
-})
-
-// ctx添加render方法，绑定Nunjucks模板
-// const templating = require('./middleware/templating');
 
 // rest中间件
 // const rest = require('./middleware/rest');
@@ -44,9 +32,6 @@ app.use(async (ctx) => {
 //     path.join(__dirname, staticPath)
 // ))
 
-// 判断当前环境是否是production环境 production development
-// const config = require('./config')
-// const isProduction = config.mode === 'prod';
 // 测试环境下 解析静态文件；线上用ngix反向代理
 // if (!isProduction) {
 //     console.log('测试环境，使用static-files')
@@ -55,28 +40,14 @@ app.use(staticFiles('/static/', __dirname + '/static'));
 //     app.use(staticFiles('/dist/', __dirname + '/dist'));
 // }
 
-
-
-
-
 // koa-bodyparser必须在router之前被注册到app对象上
 // koa-bodyparser中间件可以把koa2上下文的formData数据解析到ctx.request.body中
 const bodyParser = require('koa-bodyparser');
 // 使用ctx.body解析中间件
 app.use(bodyParser())
 
-// add nunjucks as view:
-// templating('views', {
-//     noCache: !isProduction,
-//     watch: !isProduction
-// }, app);
-
 // bind .rest() for ctx:
 // app.use(rest.restify());
-
-// koa-router中间件
-const Router = require('koa-router')
-const fs = require('fs');
 
 /**
  * 用Promise封装异步读取文件方法
@@ -95,11 +66,62 @@ function render(page) {
         })
     })
 }
+
+// // 加载ejs模板引擎
+// const views = require('koa-views')
+// app.use(views(path.join(__dirname, './views'), {
+//     extension: 'ejs'
+// }))
+// app.use(async (ctx) => {
+//     let title = 'hello koa2'
+//     await ctx.render('index', {
+//         title,
+//     })
+// })
+
+// 加载Nunjucks模板引擎
+// const templating = require('./middleware/templating');
+// templating('views', {
+//     noCache: !isProduction,
+//     watch: !isProduction
+// }, app);
+const nunjucks = require('nunjucks');
+function createEnv(path, opts) {
+    let autoescape = opts.autoescape === undefined ? true : opts.autoescape
+    let noCache = opts.noCache || false
+    let watch = opts.watch || false
+    let throwOnUndefined = opts.throwOnUndefined || false
+    let env = new nunjucks.Environment(
+        new nunjucks.FileSystemLoader(path || 'views', {
+            noCache: noCache,
+            watch: watch,
+        }), {
+        autoescape: autoescape,
+        throwOnUndefined: throwOnUndefined
+    });
+    if (opts.filters) {
+        for (var f in opts.filters) {
+            env.addFilter(f, opts.filters[f]);
+        }
+    }
+    return env;
+}
+let env = createEnv('views', {
+    watch: true,
+    filters: {
+        hex: function (n) {
+            return '0x' + n.toString(16);
+        }
+    }
+});
+
+
+// koa-router中间件
+const Router = require('koa-router')
 // 子路由1
 let home = new Router()
 home.get('/', async (ctx) => {
     let html = await render('demo.html')
-    console.log(html)
     ctx.body = html
 }).get('rd', async (ctx) => {
     let url = ctx.url
@@ -127,6 +149,12 @@ page.get('/404', async (ctx) => {
     ctx.body = 'helloworld page!'
 }).get('/gd', async (ctx) => {
     ctx.body = 'gd!'
+}).get('/nj', async (ctx) => {
+    // Nunjucks默认就使用同步IO读取模板文件
+    ctx.body = env.render('demo-unjucks.html', {
+        header: 'Hello',
+        body: 'bla bla bla...'
+    });
 }).get('/ck', async (ctx) => {
     // ctx.cookies.set(name, value, [options])
     ctx.cookies.set(
@@ -169,11 +197,6 @@ router.use('/', home.routes(), home.allowedMethods())
 router.use('/page', page.routes(), page.allowedMethods())
 // 加载路由中间件
 app.use(router.routes()).use(router.allowedMethods())
-
-
-
-
-
 
 /**
  * 自动扫描controllers文件夹中的js文件 
