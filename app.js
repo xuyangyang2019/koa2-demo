@@ -1,3 +1,5 @@
+const path = require('path')
+
 // 创建app实例
 // 导入koa，和koa 1.x不同，在koa2中，我们导入的是一个class，因此用大写的Koa表示:
 const Koa = require('koa');
@@ -15,6 +17,18 @@ const app = new Koa();
 const loggerAsync = require('./middleware/logger-async')
 app.use(loggerAsync())
 
+// 加载模板引擎
+const views = require('koa-views')
+app.use(views(path.join(__dirname, './views'), {
+    extension: 'ejs'
+}))
+
+app.use(async (ctx) => {
+    let title = 'hello koa2'
+    await ctx.render('index', {
+        title,
+    })
+})
 
 // ctx添加render方法，绑定Nunjucks模板
 // const templating = require('./middleware/templating');
@@ -23,7 +37,6 @@ app.use(loggerAsync())
 // const rest = require('./middleware/rest');
 
 // koa-static中间件使用
-// const path = require('path')
 // const static = require('koa-static')
 // // 静态资源目录对于相对入口文件index.js的路径
 // const staticPath = './static'
