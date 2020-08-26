@@ -115,19 +115,20 @@ page.get('/404', async (ctx) => {
 }).get('/gd', async (ctx) => {
     ctx.body = 'gd!'
 }).get('/ck', async (ctx) => {
+    // ctx.cookies.set(name, value, [options])
     ctx.cookies.set(
         'cid',
         'hello world',
         {
-            domain: 'localhost',  // 写cookie所在的域名
-            path: '/index',       // 写cookie所在的路径
             maxAge: 10 * 60 * 1000, // cookie有效时长
-            expires: new Date('2017-02-15'),  // cookie失效时间
-            httpOnly: false,  // 是否只用于http请求中获取
-            overwrite: false  // 是否允许重写
+            expires: new Date('2020-09-15'),  // cookie失效时间
+            path: '/index',       // 写cookie所在的路径,默认是'/'
+            domain: 'localhost',  // 写cookie所在的域名
+            httpOnly: false,  // 是否只是服务器可访问 cookie, 默认是 true
+            overwrite: false,  // 是否允许重写
+            // secure // 安全 cookie   默认false，设置成true表示只有 https可以访问
         }
     )
-    console.log(ctx.cookies)
     ctx.body = 'cookie is ok'
 }).get('/pd', async (ctx) => {
     let html = `
