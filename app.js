@@ -5,6 +5,9 @@ const path = require('path')
 // 导入koa，和koa 1.x不同，在koa2中，我们导入的是一个class，因此用大写的Koa表示:
 const Koa = require('koa');
 
+// 文件上传
+const { uploadFile } = require('./util/upload')
+
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
 // 判断当前环境是否是production环境 production development
@@ -154,7 +157,16 @@ page.get('/404', async (ctx) => {
     ctx.body = env.render('demo-unjucks.html', {
         header: 'Hello',
         body: 'bla bla bla...'
-    });
+    })
+}).get('/upload', async (ctx) => {
+    let html = ` <h1>koa2 upload demo</h1>
+    <form method="POST" action="/page/upload" enctype="multipart/form-data">
+      <p>file upload</p>
+      <span>picName:</span><input name="picName" type="text" /><br/>
+      <input name="file" type="file" /><br/><br/>
+      <button type="submit">submit</button>
+    </form>`
+    ctx.body = html
 }).get('/ck', async (ctx) => {
     // ctx.cookies.set(name, value, [options])
     ctx.cookies.set(
@@ -189,6 +201,18 @@ page.get('/404', async (ctx) => {
     // 当POST请求的时候，解析POST表单里的数据，并显示出来
     let postData = ctx.request.body
     ctx.body = postData
+}).post('/upload', async (ctx) => {
+    console.log('上传文件')
+    console.log(ctx.url)
+    // 上传文件请求处理
+    let result = { success: false }
+    let serverFilePath = path.join(__dirname, 'upload-files')
+    // 上传文件事件
+    result = await uploadFile(ctx, {
+        fileType: 'album', // common or album
+        path: serverFilePath
+    })
+    ctx.body = result
 })
 
 // 装载所有子路由
