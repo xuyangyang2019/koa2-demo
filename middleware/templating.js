@@ -8,7 +8,7 @@ const nunjucks = require('nunjucks');
  */
 function createEnv(path, opts) {
     let autoescape = opts.autoescape === undefined ? true : opts.autoescape
-    let noCache = opts.noCache || false
+    let noCache = opts.noCache || false // 在开发环境下，可以关闭cache，这样每次重新加载模板，便于实时修改模板
     let watch = opts.watch || false
     let throwOnUndefined = opts.throwOnUndefined || false
 
@@ -30,6 +30,7 @@ function createEnv(path, opts) {
     return env;
 }
 
+// 异步方法 不能用可能写错了吧
 // function templating(path, opts) {
 //     // 创建Nunjucks的env对象:
 //     var env = createEnv(path, opts);
@@ -46,6 +47,7 @@ function createEnv(path, opts) {
 //     };
 // }
 
+// 同步方法 能用
 function templating(path, opts, app) {
     console.log(path)
     let env = createEnv(path, opts);
