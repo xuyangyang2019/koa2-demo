@@ -26,11 +26,11 @@ function createEnv(path, opts) {
             env.addFilter(f, opts.filters[f]);
         }
     }
-    
+
     return env;
 }
 
-// 异步方法 不能用可能写错了吧
+// async中间件的形式调用
 // function templating(path, opts) {
 //     // 创建Nunjucks的env对象:
 //     var env = createEnv(path, opts);
@@ -47,9 +47,8 @@ function createEnv(path, opts) {
 //     };
 // }
 
-// 同步方法 能用
+// 加载到app.context
 function templating(path, opts, app) {
-    console.log(path)
     let env = createEnv(path, opts);
     //app.context为ctx的原型
     app.context.render = function (view, model) {
