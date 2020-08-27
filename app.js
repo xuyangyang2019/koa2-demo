@@ -1,56 +1,20 @@
 const fs = require('fs');
 const path = require('path')
 
+// 文件上传
+const { uploadFile } = require('./util/upload')
+const { uploadAsync } = require('./util/uploadAsync')
+
+// 判断当前环境是否是production环境 production development
+// const config = require('./config')
+// const isProduction = config.mode === 'prod';
+const isProduction = process.env.NODE_ENV === 'production';
+
 // 创建app实例
 // 导入koa，和koa 1.x不同，在koa2中，我们导入的是一个class，因此用大写的Koa表示:
 const Koa = require('koa');
-
-// 文件上传
-const { uploadFile } = require('./util/upload')
-
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
-// 判断当前环境是否是production环境 production development
-const config = require('./config')
-const isProduction = config.mode === 'prod';
-
-// generator中间件开发 
-// generator中间件在koa v2中需要用koa-convert封装一下才能使用
-// const convert = require('koa-convert')
-// const loggerGenerator  = require('./middleware/logger-generator')
-// app.use(convert(loggerGenerator()))
-
-// async中间件开发
-const loggerAsync = require('./middleware/logger-async')
-app.use(loggerAsync())
-
-// rest中间件
-// const rest = require('./middleware/rest');
-
-// koa-static中间件使用
-// const static = require('koa-static')
-// // 静态资源目录对于相对入口文件index.js的路径
-// const staticPath = './static'
-// app.use(static(
-//     path.join(__dirname, staticPath)
-// ))
-
-// 测试环境下 解析静态文件；线上用ngix反向代理
-// if (!isProduction) {
-//     console.log('测试环境，使用static-files')
-let staticFiles = require('./middleware/static-files');
-app.use(staticFiles('/static/', __dirname + '/static'));
-//     app.use(staticFiles('/dist/', __dirname + '/dist'));
-// }
-
-// koa-bodyparser必须在router之前被注册到app对象上
-// koa-bodyparser中间件可以把koa2上下文的formData数据解析到ctx.request.body中
-const bodyParser = require('koa-bodyparser');
-// 使用ctx.body解析中间件
-app.use(bodyParser())
-
-// bind .rest() for ctx:
-// app.use(rest.restify());
 
 /**
  * 用Promise封装异步读取文件方法
@@ -70,9 +34,60 @@ function render(page) {
     })
 }
 
+// unjucks模板的reder方法添加到app.context上
+const templating = require('./middleware/templating');
+// 把render添加在app.context上
+templating('views', {
+    noCache: !isProduction,
+    watch: !isProduction
+}, app)
+
+// **************第一个middleware是记录URL以及页面执行时间********************
+// generator中间件开发
+// generator中间件在koa v2中需要用koa-convert封装一下才能使用
+// const convert = require('koa-convert')
+// const loggerGenerator  = require('./middleware/logger-generator')
+// app.use(convert(loggerGenerator()))
+
+// async中间件开发
+const loggerAsync = require('./middleware/logger-async')
+app.use(loggerAsync())
+// ************************************************************************
+
+
+// **************第二个middleware处理静态文件********************************
+// // koa-static中间件使用 有问题暂时不用
+// const static = require('koa-static')
+// // 静态资源目录对于相对入口文件index.js的路径
+// const staticPath = './static'
+// app.use(static(
+//     path.join(__dirname, staticPath)
+// ))
+
+// 原生实现
+// 生产环境下，静态文件是由部署在最前面的反向代理服务器（如Nginx）处理的，Node程序不需要处理静态文件。
+// 而在开发环境下，我们希望koa能顺带处理静态文件，否则，就必须手动配置一个反向代理服务器，这样会导致开发环境非常复杂。
+if (!isProduction) {
+    let staticFiles = require('./middleware/static-files');
+    app.use(staticFiles('/static/', __dirname + '/static'));
+    // app.use(staticFiles('/dist/', __dirname + '/dist'));
+}
+// ************************************************************************
+
+
+// **************第三个middleware解析POST请求*******************************
+// koa-bodyparser必须在router之前被注册到app对象上
+// koa-bodyparser中间件可以把koa2上下文的formData数据解析到ctx.request.body中
+const bodyParser = require('koa-bodyparser');
+// 使用ctx.body解析中间件
+app.use(bodyParser())
+// ************************************************************************
+
+
+// **************第四个middleware加载引擎模板*******************************
 // // 加载ejs模板引擎
-// const views = require('koa-views')
-// app.use(views(path.join(__dirname, './views'), {
+// const view = require('koa-views')
+// app.use(view(path.join(__dirname, './views'), {
 //     extension: 'ejs'
 // }))
 // app.use(async (ctx) => {
@@ -82,43 +97,25 @@ function render(page) {
 //     })
 // })
 
-// 加载Nunjucks模板引擎
-// const templating = require('./middleware/templating');
-// templating('views', {
-//     noCache: !isProduction,
-//     watch: !isProduction
-// }, app);
-const nunjucks = require('nunjucks');
-function createEnv(path, opts) {
-    let autoescape = opts.autoescape === undefined ? true : opts.autoescape
-    let noCache = opts.noCache || false
-    let watch = opts.watch || false
-    let throwOnUndefined = opts.throwOnUndefined || false
-    let env = new nunjucks.Environment(
-        new nunjucks.FileSystemLoader(path || 'views', {
-            noCache: noCache,
-            watch: watch,
-        }), {
-        autoescape: autoescape,
-        throwOnUndefined: throwOnUndefined
-    });
-    if (opts.filters) {
-        for (var f in opts.filters) {
-            env.addFilter(f, opts.filters[f]);
-        }
-    }
-    return env;
-}
-let env = createEnv('views', {
-    watch: true,
-    filters: {
-        hex: function (n) {
-            return '0x' + n.toString(16);
-        }
-    }
-});
+// // 这里优化一下 在app的context添加render方法,这样不用每个请求都去调用
+// // 加载Nunjucks模板引擎
+// // 中间件的形式的形式,给ctx加上render()来使用Nunjucks
+// app.use(
+//     templating('views', {
+//         noCache: !isProduction,
+//         watch: !isProduction
+//     })
+// )
+// ************************************************************************
+
+// 其他中间件
+// rest中间件
+// const rest = require('./middleware/rest');
+// bind .rest() for ctx:
+// app.use(rest.restify());
 
 
+// **************最后一个middleware处理URL路由*******************************
 // koa-router中间件
 const Router = require('koa-router')
 // 子路由1
@@ -127,12 +124,12 @@ home.get('/', async (ctx) => {
     let html = await render('demo.html')
     ctx.body = html
 }).get('rd', async (ctx) => {
+    // 获取get请求数据demo
     let url = ctx.url
     // 从上下文的request对象中获取
     let request = ctx.request
     let req_query = request.query
     let req_querystring = request.querystring
-
     // 从上下文中直接获取
     let ctx_query = ctx.query
     let ctx_querystring = ctx.querystring
@@ -154,11 +151,13 @@ page.get('/404', async (ctx) => {
     ctx.body = 'gd!'
 }).get('/nj', async (ctx) => {
     // Nunjucks默认就使用同步IO读取模板文件
-    ctx.body = env.render('demo-unjucks.html', {
+    ctx.render('demo-unjucks.html', {
+        title: 'unjucks-upload-page',
         header: 'Hello',
-        body: 'bla bla bla...'
+        main: 'bla bla bla...'
     })
 }).get('/upload', async (ctx) => {
+    // 文件上传demo
     let html = ` <h1>koa2 upload demo</h1>
     <form method="POST" action="/page/upload" enctype="multipart/form-data">
       <p>file upload</p>
@@ -168,6 +167,7 @@ page.get('/404', async (ctx) => {
     </form>`
     ctx.body = html
 }).get('/ck', async (ctx) => {
+    // cookies操作demo
     // ctx.cookies.set(name, value, [options])
     ctx.cookies.set(
         'cid',
@@ -184,6 +184,7 @@ page.get('/404', async (ctx) => {
     )
     ctx.body = 'cookie is ok'
 }).get('/pd', async (ctx) => {
+    // post表单demo
     let html = `
     <h1>koa2 request post demo</h1>
     <form method="POST" action="/page/pd">
@@ -202,8 +203,7 @@ page.get('/404', async (ctx) => {
     let postData = ctx.request.body
     ctx.body = postData
 }).post('/upload', async (ctx) => {
-    console.log('上传文件')
-    console.log(ctx.url)
+    // 文件上传结果
     // 上传文件请求处理
     let result = { success: false }
     let serverFilePath = path.join(__dirname, 'upload-files')
@@ -214,13 +214,14 @@ page.get('/404', async (ctx) => {
     })
     ctx.body = result
 })
-
 // 装载所有子路由
 let router = new Router()
 router.use('/', home.routes(), home.allowedMethods())
 router.use('/page', page.routes(), page.allowedMethods())
 // 加载路由中间件
 app.use(router.routes()).use(router.allowedMethods())
+// ************************************************************************
+
 
 /**
  * 自动扫描controllers文件夹中的js文件 
