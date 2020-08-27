@@ -140,6 +140,16 @@ home.get('/', async (ctx) => {
         ctx_query,
         ctx_querystring
     }
+}).post('api/upload', async (ctx) => {
+    // 上传文件请求处理
+    let result = { success: false }
+    let serverFilePath = path.join(__dirname, 'static/image')
+    // 上传文件事件
+    result = await uploadAsync(ctx, {
+        fileType: 'album',
+        path: serverFilePath
+    })
+    ctx.body = result
 })
 // 子路由2
 let page = new Router()
