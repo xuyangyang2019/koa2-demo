@@ -3,6 +3,7 @@ node_modules
 /dist
 /static/dist
 /upload-files
+/static/image
 
 # local env files
 .env.local
