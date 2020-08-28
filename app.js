@@ -114,6 +114,8 @@ app.use(bodyParser())
 // bind .rest() for ctx:
 // app.use(rest.restify());
 
+// 数据库
+const { query } = require('./mysql/async-db')
 
 // **************最后一个middleware处理URL路由*******************************
 // koa-router中间件
@@ -208,6 +210,11 @@ page.get('/404', async (ctx) => {
     </form>
     `
     ctx.body = html
+}).get('/mysql', async (ctx) => {
+    // mysql demo
+    let sql = 'SELECT * FROM user'
+    let dataList = await query(sql)
+    ctx.body = dataList
 }).post('/pd', async (ctx) => {
     // 当POST请求的时候，解析POST表单里的数据，并显示出来
     let postData = ctx.request.body
