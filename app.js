@@ -285,7 +285,5 @@ app.use(router.routes()).use(router.allowedMethods())
 // let server = app.listen(3000);
 // app.wss = createWebSocketServer(server);
 
-// module.exports = app;
-app.listen(3000)
-console.log('app started at port 3000...');
+module.exports = app;
 
