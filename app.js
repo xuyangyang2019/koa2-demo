@@ -118,6 +118,30 @@ app.use(bodyParser())
 const { query } = require('./mysql/async-db')
 
 // **************最后一个middleware处理URL路由*******************************
+app.use(async (ctx, next) => {
+    // 如果jsonp 的请求为GET
+    if (ctx.method === 'GET' && ctx.url.split('?')[0] === '/getData.jsonp') {
+        // 获取jsonp的callback
+        let callbackName = ctx.query.callback || 'callback'
+        let returnData = {
+            success: true,
+            data: {
+                text: 'this is a jsonp api',
+                time: new Date().getTime(),
+            }
+        }
+        // jsonp的script字符串
+        let jsonpStr = `;${callbackName}(${JSON.stringify(returnData)})`
+        // 用text/javascript，让请求支持跨域获取
+        ctx.type = 'text/javascript'
+        // 输出jsonp字符串
+        ctx.body = jsonpStr
+    } else {
+        // ctx.body = 'hello jsonp'
+        await next()
+    }
+})
+
 // koa-router中间件
 const Router = require('koa-router')
 // 子路由1
