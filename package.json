@@ -6,6 +6,7 @@
   "scripts": {
     "test": "mocha",
     "dev": "./node_modules/.bin/nodemon bin/www",
+    "debug": "./node_modules/.bin/nodemon --inspect bin/www",
     "start": "set NODE_ENV=development&& node --use_strict app.js --dev",
     "build": "set NODE_ENV=production&& node --use_strict app.js --prod"
   },
