@@ -117,166 +117,184 @@ app.use(bodyParser())
 // 数据库
 const { query } = require('./mysql/async-db')
 
+
+// **************ajax 跨域问题**********************************************
 // jsonp
 const jsonp = require('koa-jsonp')
 // 使用中间件
 app.use(jsonp())
-
-// **************最后一个middleware处理URL路由*******************************
-app.use(async (ctx, next) => {
-    // 如果jsonp 的请求为GET
-    if (ctx.method === 'GET' && ctx.url.split('?')[0] === '/getData.jsonp') {
-        // // 获取jsonp的callback
-        // let callbackName = ctx.query.callback || 'callback'
-        // let returnData = {
-        //     success: true,
-        //     data: {
-        //         text: 'this is a jsonp api',
-        //         time: new Date().getTime(),
-        //     }
-        // }
-        // // jsonp的script字符串
-        // let jsonpStr = `;${callbackName}(${JSON.stringify(returnData)})`
-        // // 用text/javascript，让请求支持跨域获取
-        // ctx.type = 'text/javascript'
-        // // 输出jsonp字符串
-        // ctx.body = jsonpStr
-        let returnData = {
-            success: true,
-            data: {
-                text: 'this is a jsonp api',
-                time: new Date().getTime(),
-            }
-        }
-        // 直接输出JSON
-        ctx.body = returnData
-    } else {
-        // ctx.body = 'hello jsonp'
-        await next()
-    }
-})
-
-// koa-router中间件
-const Router = require('koa-router')
-// 子路由1
-let home = new Router()
-home.get('/', async (ctx) => {
-    let html = await render('demo.html')
-    ctx.body = html
-}).get('rd', async (ctx) => {
-    // 获取get请求数据demo
-    let url = ctx.url
-    // 从上下文的request对象中获取
-    let request = ctx.request
-    let req_query = request.query
-    let req_querystring = request.querystring
-    // 从上下文中直接获取
-    let ctx_query = ctx.query
-    let ctx_querystring = ctx.querystring
-    ctx.body = {
-        url,
-        req_query,
-        req_querystring,
-        ctx_query,
-        ctx_querystring
-    }
-}).post('api/upload', async (ctx) => {
-    // 上传文件请求处理
-    let result = { success: false }
-    let serverFilePath = path.join(__dirname, 'static/image')
-    // 上传文件事件
-    result = await uploadAsync(ctx, {
-        fileType: 'album',
-        path: serverFilePath
-    })
-    ctx.body = result
-})
-// 子路由2
-let page = new Router()
-page.get('/404', async (ctx) => {
-    ctx.body = '404 page!'
-}).get('/helloworld', async (ctx) => {
-    ctx.body = 'helloworld page!'
-}).get('/gd', async (ctx) => {
-    ctx.body = 'gd!'
-}).get('/nj', async (ctx) => {
-    // Nunjucks默认就使用同步IO读取模板文件
-    ctx.render('demo-unjucks.html', {
-        title: 'unjucks-upload-page',
-        header: 'Hello',
-        main: 'bla bla bla...'
-    })
-}).get('/upload', async (ctx) => {
-    // 文件上传demo
-    let html = ` <h1>koa2 upload demo</h1>
-    <form method="POST" action="/page/upload" enctype="multipart/form-data">
-      <p>file upload</p>
-      <span>picName:</span><input name="picName" type="text" /><br/>
-      <input name="file" type="file" /><br/><br/>
-      <button type="submit">submit</button>
-    </form>`
-    ctx.body = html
-}).get('/ck', async (ctx) => {
-    // cookies操作demo
-    // ctx.cookies.set(name, value, [options])
-    ctx.cookies.set(
-        'cid',
-        'hello world',
-        {
-            maxAge: 10 * 60 * 1000, // cookie有效时长
-            expires: new Date('2020-09-15'),  // cookie失效时间
-            path: '/index',       // 写cookie所在的路径,默认是'/'
-            domain: 'localhost',  // 写cookie所在的域名
-            httpOnly: false,  // 是否只是服务器可访问 cookie, 默认是 true
-            overwrite: false,  // 是否允许重写
-            // secure // 安全 cookie   默认false，设置成true表示只有 https可以访问
-        }
-    )
-    ctx.body = 'cookie is ok'
-}).get('/pd', async (ctx) => {
-    // post表单demo
-    let html = `
-    <h1>koa2 request post demo</h1>
-    <form method="POST" action="/page/pd">
-        <p>userName</p>
-        <input name="userName" /><br/>
-        <p>nickName</p>
-        <input name="nickName" /><br/>
-        <p>email</p>
-        <input name="email" /><br/>
-        <button type="submit">submit</button>
-    </form>
-    `
-    ctx.body = html
-}).get('/mysql', async (ctx) => {
-    // mysql demo
-    let sql = 'SELECT * FROM user'
-    let dataList = await query(sql)
-    ctx.body = dataList
-}).post('/pd', async (ctx) => {
-    // 当POST请求的时候，解析POST表单里的数据，并显示出来
-    let postData = ctx.request.body
-    ctx.body = postData
-}).post('/upload', async (ctx) => {
-    // 文件上传结果
-    // 上传文件请求处理
-    let result = { success: false }
-    let serverFilePath = path.join(__dirname, 'upload-files')
-    // 上传文件事件
-    result = await uploadFile(ctx, {
-        fileType: 'album', // common or album
-        path: serverFilePath
-    })
-    ctx.body = result
-})
-// 装载所有子路由
-let router = new Router()
-router.use('/', home.routes(), home.allowedMethods())
-router.use('/page', page.routes(), page.allowedMethods())
-// 加载路由中间件
-app.use(router.routes()).use(router.allowedMethods())
+// app.use(async (ctx, next) => {
+//     // 如果jsonp 的请求为GET
+//     if (ctx.method === 'GET' && ctx.url.split('?')[0] === '/getData.jsonp') {
+//         // // 获取jsonp的callback
+//         // let callbackName = ctx.query.callback || 'callback'
+//         // let returnData = {
+//         //     success: true,
+//         //     data: {
+//         //         text: 'this is a jsonp api',
+//         //         time: new Date().getTime(),
+//         //     }
+//         // }
+//         // // jsonp的script字符串
+//         // let jsonpStr = `;${callbackName}(${JSON.stringify(returnData)})`
+//         // // 用text/javascript，让请求支持跨域获取
+//         // ctx.type = 'text/javascript'
+//         // // 输出jsonp字符串
+//         // ctx.body = jsonpStr
+//         let returnData = {
+//             success: true,
+//             data: {
+//                 text: 'this is a jsonp api',
+//                 time: new Date().getTime(),
+//             }
+//         }
+//         // 直接输出JSON
+//         ctx.body = returnData
+//     } else {
+//         // ctx.body = 'hello jsonp'
+//         await next()
+//     }
+// })
 // ************************************************************************
 
+
+// 返回封装
+// app.use(require('./server/middlewares/return'))
+// app.use(rest.restify())
+
+// app.use(proxy(app))
+
+
+// **************最后一个middleware处理URL路由*******************************
+
+// // koa-router中间件
+// const Router = require('koa-router')
+// // 子路由1
+// let home = new Router()
+// home.get('/', async (ctx) => {
+//     let html = await render('demo.html')
+//     ctx.body = html
+// }).get('rd', async (ctx) => {
+//     // 获取get请求数据demo
+//     let url = ctx.url
+//     // 从上下文的request对象中获取
+//     let request = ctx.request
+//     let req_query = request.query
+//     let req_querystring = request.querystring
+//     // 从上下文中直接获取
+//     let ctx_query = ctx.query
+//     let ctx_querystring = ctx.querystring
+//     ctx.body = {
+//         url,
+//         req_query,
+//         req_querystring,
+//         ctx_query,
+//         ctx_querystring
+//     }
+// }).post('api/upload', async (ctx) => {
+//     // 上传文件请求处理
+//     let result = { success: false }
+//     let serverFilePath = path.join(__dirname, 'static/image')
+//     // 上传文件事件
+//     result = await uploadAsync(ctx, {
+//         fileType: 'album',
+//         path: serverFilePath
+//     })
+//     ctx.body = result
+// })
+// // 子路由2
+// let page = new Router()
+// page.get('/404', async (ctx) => {
+//     ctx.body = '404 page!'
+// }).get('/helloworld', async (ctx) => {
+//     ctx.body = 'helloworld page!'
+// }).get('/gd', async (ctx) => {
+//     ctx.body = 'gd!'
+// }).get('/nj', async (ctx) => {
+//     // Nunjucks默认就使用同步IO读取模板文件
+//     ctx.render('demo-unjucks.html', {
+//         title: 'unjucks-upload-page',
+//         header: 'Hello',
+//         main: 'bla bla bla...'
+//     })
+// }).get('/upload', async (ctx) => {
+//     // 文件上传demo
+//     let html = ` <h1>koa2 upload demo</h1>
+//     <form method="POST" action="/page/upload" enctype="multipart/form-data">
+//       <p>file upload</p>
+//       <span>picName:</span><input name="picName" type="text" /><br/>
+//       <input name="file" type="file" /><br/><br/>
+//       <button type="submit">submit</button>
+//     </form>`
+//     ctx.body = html
+// }).get('/ck', async (ctx) => {
+//     // cookies操作demo
+//     // ctx.cookies.set(name, value, [options])
+//     ctx.cookies.set(
+//         'cid',
+//         'hello world',
+//         {
+//             maxAge: 10 * 60 * 1000, // cookie有效时长
+//             expires: new Date('2020-09-15'),  // cookie失效时间
+//             path: '/index',       // 写cookie所在的路径,默认是'/'
+//             domain: 'localhost',  // 写cookie所在的域名
+//             httpOnly: false,  // 是否只是服务器可访问 cookie, 默认是 true
+//             overwrite: false,  // 是否允许重写
+//             // secure // 安全 cookie   默认false，设置成true表示只有 https可以访问
+//         }
+//     )
+//     ctx.body = 'cookie is ok'
+// }).get('/pd', async (ctx) => {
+//     // post表单demo
+//     let html = `
+//     <h1>koa2 request post demo</h1>
+//     <form method="POST" action="/page/pd">
+//         <p>userName</p>
+//         <input name="userName" /><br/>
+//         <p>nickName</p>
+//         <input name="nickName" /><br/>
+//         <p>email</p>
+//         <input name="email" /><br/>
+//         <button type="submit">submit</button>
+//     </form>
+//     `
+//     ctx.body = html
+// }).get('/mysql', async (ctx) => {
+//     // mysql demo
+//     let sql = 'SELECT * FROM user'
+//     let dataList = await query(sql)
+//     ctx.body = dataList
+// }).post('/pd', async (ctx) => {
+//     // 当POST请求的时候，解析POST表单里的数据，并显示出来
+//     let postData = ctx.request.body
+//     ctx.body = postData
+// }).post('/upload', async (ctx) => {
+//     // 文件上传结果
+//     // 上传文件请求处理
+//     let result = { success: false }
+//     let serverFilePath = path.join(__dirname, 'upload-files')
+//     // 上传文件事件
+//     result = await uploadFile(ctx, {
+//         fileType: 'album', // common or album
+//         path: serverFilePath
+//     })
+//     ctx.body = result
+// })
+// // 装载所有子路由
+// let router = new Router()
+// router.use('/', home.routes(), home.allowedMethods())
+// router.use('/page', page.routes(), page.allowedMethods())
+
+// // 加载路由中间件
+// app.use(router.routes()).use(router.allowedMethods())
+
+// 初始化路由中间件
+const routers = require('./routers/index')
+app.use(routers.routes()).use(routers.allowedMethods())
+
+// 路由中间件
+// app.use(index.routes(), router.allowedMethods())
+// app.use(router.routes(), router.allowedMethods())
 
 /**
  * 自动扫描controllers文件夹中的js文件 
@@ -287,6 +305,11 @@ app.use(router.routes()).use(router.allowedMethods())
 // 扫描注册Controller，并添加router:
 // const controller = require('./middleware/controller');
 // app.use(controller(__dirname + '/controllers'));
+
+// app.use(controller.generateRouter(path.join(__dirname, 'server/controllers')))
+// app.use(controller.allowedMethods())
+// ************************************************************************
+
 
 // =========================================================
 // vue-cli用到 所有的请求都指向index.html
