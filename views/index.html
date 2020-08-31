@@ -1,12 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/output/dist/css/vendor.css">
-</head>
-<body>
-    <div id="app"></div>
-    <script src="/output/dist/js/vendor.js"></script>
-    <script src="/output/dist/js/index.js"></script>
-</body>
-</html>
+{% extends 'base-unjucks.html' %}
+
+{% block header %}<h1>{{ header }}</h1>{% endblock %}
+
+{% block main %}
+<img src="/static/images/0.png" alt="" srcset="">
+<ul>
+    <li><a href="/page/helloworld">/page/helloworld</a></li>
+    <li><a href="/page/gd">/page/gd</a></li>
+    <li><a href="/page/pd">/page/pd</a></li>
+    <li><a href="/page/ck">/page/ck</a></li>
+    <li><a href="/page/nj">/page/nj</a></li>
+    <li><a href="/page/upload">/page/upload</a></li>
+    <li><a href="/page/mysql">/page/mysql</a></li>
+    <li><a href="/page/404">/page/404</a></li>
+</ul>
+<button class="btn" id="J_UploadPictureBtn">上传图片</button>
+<hr />
+<p>上传进度<span id="J_UploadProgress">0</span>%</p>
+<p>上传结果图片</p>
+<div id="J_PicturePreview" class="preview-picture">
+</div>
+<script src="/static/js/index.js"></script>
+{% endblock %}
