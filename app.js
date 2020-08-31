@@ -13,26 +13,30 @@ const isProduction = process.env.NODE_ENV === 'production';
 // 创建app实例
 // 导入koa，和koa 1.x不同，在koa2中，我们导入的是一个class，因此用大写的Koa表示:
 const Koa = require('koa');
+// 日志中间件
+const logger = require('koa-logger')
+
+
 // 创建一个Koa对象表示web app本身:
 const app = new Koa();
 
-/**
- * 用Promise封装异步读取文件方法
- * @param  {string} page html文件名称
- * @return {promise}      
- */
-function render(page) {
-    return new Promise((resolve, reject) => {
-        let viewUrl = `./views/${page}`
-        fs.readFile(viewUrl, "binary", (err, data) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve(data)
-            }
-        })
-    })
-}
+// /**
+//  * 用Promise封装异步读取文件方法
+//  * @param  {string} page html文件名称
+//  * @return {promise}      
+//  */
+// function render(page) {
+//     return new Promise((resolve, reject) => {
+//         let viewUrl = `./views/${page}`
+//         fs.readFile(viewUrl, "binary", (err, data) => {
+//             if (err) {
+//                 reject(err)
+//             } else {
+//                 resolve(data)
+//             }
+//         })
+//     })
+// }
 
 // unjucks模板的reder方法添加到app.context上
 const templating = require('./middleware/templating');
@@ -50,8 +54,11 @@ templating('views', {
 // app.use(convert(loggerGenerator()))
 
 // async中间件开发
-const loggerAsync = require('./middleware/logger-async')
-app.use(loggerAsync())
+// const loggerAsync = require('./middleware/logger-async')
+// app.use(loggerAsync())
+
+app.use(logger())
+
 // ************************************************************************
 
 
