@@ -1,6 +1,17 @@
 {% extends 'base-unjucks.html' %}
 
-{% block header %}<h1>{{ header }}</h1>{% endblock %}
+{% block header %}
+<nav>
+    <ul>
+        <li>
+            <a href="/">首页</a>
+        </li>
+        <li>
+            <a href="/admin">admin</a>
+        </li>
+    </ul>
+</nav>
+{% endblock %}
 
 {% block main %}
 <img src="/static/images/0.png" alt="" srcset="">
