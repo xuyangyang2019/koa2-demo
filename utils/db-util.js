@@ -1,12 +1,12 @@
-const allConfig = require("../config/config")
-const config = allConfig.database
 const mysql = require("mysql")
+// 配置文件
+const config = require("../config")
 
 const pool = mysql.createPool({
-    host: config.HOST,
-    user: config.USERNAME,
-    password: config.PASSWORD,
-    database: config.DATABASE
+    host: config.DB_HOST,
+    user: config.DB_USER,
+    password: config.DB_PASS,
+    database: config.DB_NAME
 })
 
 let query = function (sql, values) {

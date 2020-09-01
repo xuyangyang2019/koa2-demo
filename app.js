@@ -6,9 +6,9 @@ const { uploadFile } = require('./utils/upload')
 const { uploadAsync } = require('./utils/uploadAsync')
 
 // 判断当前环境是否是production环境 production development
-// const config = require('./config')
-// const isProduction = config.mode === 'prod';
-const isProduction = process.env.NODE_ENV === 'production';
+const config = require('./config')
+const isProduction = config.mode === 'prod';
+// console.log(process.env.NODE_ENV)
 
 // 创建app实例
 // 导入koa，和koa 1.x不同，在koa2中，我们导入的是一个class，因此用大写的Koa表示:
