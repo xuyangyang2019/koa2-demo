@@ -4,12 +4,13 @@
  */
 
 const router = require('koa-router')()
-const userInfoController = require('../controllers/user')
+const apiController = require('../controllers/apiController')
 
 const routers = router
-  .get('/user/getUserInfo', userInfoController.getLoginUserInfo)
-  .post('/user/signIn', userInfoController.signIn)
-  .post('/user/signUp', userInfoController.signUp)
+  .get('/user/getLoginUserInfo', apiController.getLoginUserInfo)
+  .get('/user/getAllUsers', apiController.getAllUsers)
+  .post('/user/signIn', apiController.signIn)
+  .post('/user/signUp', apiController.signUp)
  
   
 module.exports = routers
