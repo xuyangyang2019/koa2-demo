@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "mocha",
-    "dev": "./node_modules/.bin/nodemon bin/www",
+    "dev": "./node_modules/.bin/nodemon bin/www --dev",
     "debug": "./node_modules/.bin/nodemon --inspect bin/www",
     "start": "set NODE_ENV=development&& node --use_strict app.js --dev",
     "build": "set NODE_ENV=production&& node --use_strict app.js --prod"
@@ -24,7 +24,6 @@
     "koa-views": "^6.3.0",
     "mime": "^2.4.4",
     "mysql": "^2.18.1",
-    "mysql2": "^2.0.1",
     "mz": "^2.7.0",
     "node-uuid": "^1.4.8",
     "nunjucks": "^3.2.0",
