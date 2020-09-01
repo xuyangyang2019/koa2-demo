@@ -3,8 +3,8 @@
  */
 
 const validator = require('validator')
-const userModel = require('./../models/user-info')
-const userCode = require('./../codes/user')
+const userModel = require('./../models/User')
+const userCode = require('../codes/user')
 
 const user = {
 
