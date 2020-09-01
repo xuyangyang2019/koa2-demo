@@ -2,8 +2,8 @@ const fs = require('fs');
 const path = require('path')
 
 // 文件上传
-const { uploadFile } = require('./util/upload')
-const { uploadAsync } = require('./util/uploadAsync')
+const { uploadFile } = require('./utils/upload')
+const { uploadAsync } = require('./utils/uploadAsync')
 
 // 判断当前环境是否是production环境 production development
 // const config = require('./config')
@@ -122,7 +122,7 @@ app.use(bodyParser())
 // app.use(rest.restify());
 
 // 数据库
-const { query } = require('./mysql/async-db')
+// const { query } = require('./mysql/async-db')
 
 
 // **************ajax 跨域问题**********************************************

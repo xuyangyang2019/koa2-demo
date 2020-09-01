@@ -1,7 +1,7 @@
 const APIError = require('../middleware/rest').APIError;
 
 // 存储Product列表，相当于模拟数据库:
-const products = require('../service/products');
+const products = require('../services/products');
 
 var gid = 0;
 
