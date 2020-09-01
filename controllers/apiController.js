@@ -1,5 +1,7 @@
-const userInfoService = require('../services/userInfo')
-const userCode = require('../codes/user')
+const userCode = require('../codes/userErrorCodes')
+const userInfoService = require('../services/userService')
+
+const { query } = require('../utils/db-util')
 
 module.exports = {
 
@@ -106,7 +108,7 @@ module.exports = {
     console.log('getLoginUserInfo')
     let session = ctx.session
     let isLogin = session && session.isLogin ? session.isLogin : false
-    let userName = session && session.userName ? session.userName:''
+    let userName = session && session.userName ? session.userName : ''
 
     console.log('session=', session)
 
@@ -148,5 +150,13 @@ module.exports = {
       result.code = ''
     }
     return result
+  },
+  /**
+   * 获取所有的用户
+   * @param {*} ctx 
+   */
+  async getAllUsers(ctx) {
+    console.log('getAllUsers')
+    ctx.body = await query('select * from user')
   }
 }
