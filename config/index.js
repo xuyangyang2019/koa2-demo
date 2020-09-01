@@ -4,9 +4,10 @@ const process = require('process')
 // const mode = process.env.OS === 'Windows_NT' ? 'env' : 'prod'
 
 // 也可以通过package.json中配置的启动命令判断处于开发还是生产环境。
-const mode = process.argv[2] === '--prod' ? 'prod' : 'dev'
+const mode = process.argv[2] === 'prod' ? 'prod' : 'dev'
+console.log(mode)
 
 module.exports = {
     mode, // 当前所处环境
-    ...(mode === 'production' ? require('./config.prod') : require('./config.dev'))  // 当前环境的配置
+    ...(mode === 'prod' ? require('./config.prod') : require('./config.dev'))  // 当前环境的配置
 }
