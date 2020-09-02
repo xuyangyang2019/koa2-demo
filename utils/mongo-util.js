@@ -1,77 +1,112 @@
-//2. 加载模块
-const mongoose = require("mongoose");
+/**
+ * 通用列表
+ * @method list
+ * @param  {[type]} ctx     [description]
+ * @param  {[type]} mongoDB [description]
+ * @param  {[type]} sort    排序
+ * @return {[type]}         [description]
+ */
+exports.list = async (ctx, mongoDB, sort) => {
+    sort = sort || '-_id'
+    let { limit, page } = ctx.query
+    page = parseInt(page, 10)
+    limit = parseInt(limit, 10)
+    if (!page) page = 1
+    if (!limit) limit = 10
+    var skip = (page - 1) * limit
+    try {
+        const [list, total] = await Promise.all([
+            mongoDB
+                .find()
+                .sort(sort)
+                .skip(skip)
+                .limit(limit)
+                .exec(),
+            mongoDB.countDocumentsAsync()
+        ])
+        var totalPage = Math.ceil(total / limit)
+        ctx.body = list
+        // ctx.success({
+        //     list,
+        //     total,
+        //     hasNext: totalPage > page ? 1 : 0,
+        //     hasPrev: page > 1 ? 1 : 0
+        // })
+    } catch (err) {
+        console.log(err)
+        // ctx.error(null, err.toString())
+    }
+}
 
-//3. 连接数据库 mongod 服务器端  mongo客户端
-//数据库的名称可以是不存在 创建一个zf数据库
-const DB_URL = 'mongodb://localhost:27017/test' /** * 连接 */
-// var db = mongoose.connect('mongodb://user:pass@localhost:port/database')
-mongoose.connect(DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-const db = mongoose.connection
+/**
+ * 通用单个
+ * @method item
+ * @param  {[type]} ctx     [description]
+ * @param  {[type]} mongoDB [description]
+ * @return {[type]}         [description]
+ */
+exports.item = async (ctx, mongoDB) => {
+    const _id = ctx.query.id
+    if (!_id) {
+        ctx.error(null, '参数错误')
+        return
+    }
+    try {
+        const result = await mongoDB.findOneAsync({ _id })
+        ctx.success(result)
+    } catch (err) {
+        ctx.error(null, err.toString())
+    }
+}
 
-/** * 连接成功 */
-db.on('connected', function () {
-    console.log('Mongoose connection open to ' + DB_URL)
-})
+/**
+ * 通用删除
+ * @method deletes
+ * @param  {[type]} ctx     [description]
+ * @param  {[type]} mongoDB [description]
+ * @return {[type]}         [description]
+ */
+exports.deletes = async (ctx, mongoDB) => {
+    const _id = ctx.query.id
+    try {
+        await mongoDB.updateOneAsync({ _id }, { is_delete: 1 })
+        ctx.success('success', '更新成功')
+    } catch (err) {
+        ctx.error(null, err.toString())
+    }
+}
 
-/** * 连接异常 */
-db.on('error', function (err) {
-    console.log('Mongoose connection error: ' + err)
-})
+/**
+ * 通用编辑
+ * @method modify
+ * @param  {[type]} ctx     [description]
+ * @param  {[type]} mongoDB [description]
+ * @param  {[type]} _id     [description]
+ * @param  {[type]} data    [description]
+ * @return {[type]}         [description]
+ */
+exports.modify = async (ctx, mongoDB, _id, data) => {
+    try {
+        const result = await mongoDB.findOneAndUpdateAsync({ _id }, data, { new: true })
+        ctx.success(result, '更新成功')
+    } catch (err) {
+        ctx.error(null, err.toString())
+    }
+}
 
-/** * 连接断开 */
-db.on('disconnected', function () {
-    console.log('Mongoose connection disconnected')
-})
-
-// db.once('open', function() {
-//     // we're connected!
-//     console.log('mongodb open')
-//     var kittySchema = mongoose.Schema({
-//         name: String
-//     })
-//     // 译者注：注意了， method 是给 document 用的
-//     // NOTE: methods must be added to the schema before compiling it with mongoose.model()
-//     kittySchema.methods.speak = function() {
-//         var greeting = this.name ? 'Meow name is ' + this.name : "I don't have a name"
-//         console.log(greeting)
-//     }
-//     var Kitten = mongoose.model('Kitten', kittySchema)
-
-//     var fluffy = new Kitten({ name: 'fluffy' })
-//     fluffy.save(function(err, fluffy) {
-//         if (err) return console.error(err)
-//         fluffy.speak()
-//     })
-//     Kitten.find(function(err, kittens) {
-//         if (err) return console.error(err)
-//         console.log(kittens)
-//     })
-// })
-
-
-//定义一个 schema,描述此集合里有哪些字段，字段是什么类型
-//只有schema中有的属性才能被保存到数据库中
-// var PersonSchema = new mongoose.Schema({
-//     name: { type: String },
-//     home: { type: String },
-//     age: { type: Number, default: 0 },
-//     time: { type: Date, default: Date.now },
-//     email: { type: String, default: '' }
-// });
-// //创建模型，可以用它来操作数据库中的person集合，指的是整体
-// var PersonModel = db.model("person", PersonSchema);
-// //根据模型创建实体，是指的个体对象
-// var personEntity = new PersonModel({
-//     name: "zf",
-//     age: 6,
-//     email: "zf@qq.com",
-//     home: 'beijing'
-// });
-// //用save 方法把自己保存到数据库中
-// personEntity.save(function (error, doc) {
-//     if (error) {
-//         console.log("error :" + error);
-//     } else {
-//         console.log(doc);
-//     }
-// });
+/**
+ * 通用编辑
+ * @method recover
+ * @param  {[type]} ctx     [description]
+ * @param  {[type]} mongoDB [description]
+ * @return {[type]}         [description]
+ */
+exports.recover = async (ctx, mongoDB) => {
+    const _id = ctx.query.id
+    try {
+        await mongoDB.updateOneAsync({ _id }, { is_delete: 0 })
+        ctx.success('success', '更新成功')
+    } catch (err) {
+        ctx.error(null, err.toString())
+    }
+}
