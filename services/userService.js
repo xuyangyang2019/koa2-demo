@@ -7,62 +7,71 @@ const userModel = require('../models/userModel')
 const userCode = require('../codes/userErrorCodes')
 
 const user = {
-
   /**
-   * 创建用户
-   * @param  {object} user 用户信息
-   * @return {object}      创建结果
-   */
-  async create(user) {
-    let result = await userModel.create()
-    return result
-  },
-
-  /**
-   * 查找存在用户信息
-   * @param  {object} formData 查找的表单数据
-   * @return {object|null}      查找结果
-   */
-  async getExistOne(formData) {
-    let resultData = await userModel.getExistOne({
-      'email': formData.email,
-      'name': formData.userName
-    })
+ * 查找存在用户信息
+ * @return {object|null}      查找结果
+ */
+  async getAllUser() {
+    let resultData = await userModel.queryAllUser()
+    console.log(resultData)
     return resultData
   },
 
+  // /**
+  //  * 创建用户
+  //  * @param  {object} user 用户信息
+  //  * @return {object}      创建结果
+  //  */
+  // async create(user) {
+  //   let result = await userModel.create()
+  //   return result
+  // },
 
-  /**
-   * 登录业务操作
-   * @param  {object} formData 登录表单信息
-   * @return {object}          登录业务操作结果
-   */
-  async signIn(formData) {
-    let resultData = await userModel.getOneByUserNameAndPassword({
-      'password': formData.password,
-      'name': formData.userName
-    })
-    return resultData
-  },
+  // /**
+  //  * 查找存在用户信息
+  //  * @param  {object} formData 查找的表单数据
+  //  * @return {object|null}      查找结果
+  //  */
+  // async getExistOne(formData) {
+  //   let resultData = await userModel.getExistOne({
+  //     'email': formData.email,
+  //     'name': formData.userName
+  //   })
+  //   return resultData
+  // },
 
 
-  /**
-   * 根据用户名查找用户业务操作
-   * @param  {string} userName 用户名
-   * @return {object|null}     查找结果
-   */
-  async getUserInfoByUserName(userName) {
+  // /**
+  //  * 登录业务操作
+  //  * @param  {object} formData 登录表单信息
+  //  * @return {object}          登录业务操作结果
+  //  */
+  // async signIn(formData) {
+  //   let resultData = await userModel.getOneByUserNameAndPassword({
+  //     'password': formData.password,
+  //     'name': formData.userName
+  //   })
+  //   return resultData
+  // },
 
-    let resultData = await userModel.getUserInfoByUserName(userName) || {}
-    let userInfo = {
-      // id: resultData.id,
-      email: resultData.email,
-      userName: resultData.name,
-      detailInfo: resultData.detail_info,
-      createTime: resultData.create_time
-    }
-    return userInfo
-  },
+
+  // /**
+  //  * 根据用户名查找用户业务操作
+  //  * @param  {string} userName 用户名
+  //  * @return {object|null}     查找结果
+  //  */
+  // async getUserInfoByUserName(userName) {
+
+  //   let resultData = await userModel.getUserInfoByUserName(userName) || {}
+  //   let userInfo = {
+  //     // id: resultData.id,
+  //     email: resultData.email,
+  //     userName: resultData.name,
+  //     detailInfo: resultData.detail_info,
+  //     createTime: resultData.create_time
+  //   }
+  //   return userInfo
+  // },
 
 
   /**
