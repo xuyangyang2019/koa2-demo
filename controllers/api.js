@@ -1,11 +1,19 @@
 const APIError = require('../middleware/rest').APIError;
 const userService = require('../services/userService')
+const adminService = require('../services/adminService')
 
 
 module.exports = {
     // 获取
     'GET /api/users': async (ctx, next) => {
         ctx.body = await userService.getAllUser()
+    },
+    'GET /api/admins': async (ctx, next) => {
+        await adminService.getList(ctx)
+        // adminModel.find({}, {}, (err, docs) => {
+        //     console.log(docs)
+        // })
+        // ctx.body = 'admins'
     },
     // // 获取
     // 'GET /api/todos': async (ctx, next) => {
