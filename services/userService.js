@@ -3,8 +3,9 @@
  */
 
 const validator = require('validator')
-const userModel = require('../mysql/models/userModel')
 const userCode = require('../codes/userErrorCodes')
+
+const userModel = require('../mysql/models/userModel')
 
 const user = {
   /**
