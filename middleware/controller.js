@@ -62,5 +62,6 @@ module.exports = function (dir_path) {
     let controllers_path = dir_path || 'controllers';
     const router = require('koa-router')();
     addControllers(router, controllers_path);
-    return router.routes();
+    // return router.routes();
+    return router;
 };

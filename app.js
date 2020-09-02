@@ -174,8 +174,8 @@ app.use(jsonp())
 
 // **************最后一个middleware处理URL路由*******************************
 // 初始化路由中间件
-const routers = require('./routers/index')
-app.use(routers.routes()).use(routers.allowedMethods())
+// const routers = require('./routers/index')
+// app.use(routers.routes()).use(routers.allowedMethods())
 
 /**
  * 自动扫描controllers文件夹中的js文件 
@@ -184,8 +184,8 @@ app.use(routers.routes()).use(routers.allowedMethods())
  * 遍历每个mapping 自动添加router router.get(path, mapping[url])
  */
 // 扫描注册Controller，并添加router:
-// const controller = require('./middleware/controller');
-// app.use(controller(__dirname + '/controllers'));
+const router = require('./middleware/controller')(__dirname + '/controllers');
+app.use(router.routes()).use(router.allowedMethods())
 
 // app.use(controller.generateRouter(path.join(__dirname, 'server/controllers')))
 // app.use(controller.allowedMethods())
