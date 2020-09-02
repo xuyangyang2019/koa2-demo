@@ -1,4 +1,4 @@
-const dbUtils = require('../utils/mysql-util')
+const dbUtils = require('../../utils/mysql-util')
 
 const user = {
   /**

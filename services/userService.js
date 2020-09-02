@@ -3,7 +3,7 @@
  */
 
 const validator = require('validator')
-const userModel = require('../models/userModel')
+const userModel = require('../mysql/models/userModel')
 const userCode = require('../codes/userErrorCodes')
 
 const user = {
@@ -13,7 +13,6 @@ const user = {
  */
   async getAllUser() {
     let resultData = await userModel.queryAllUser()
-    console.log(resultData)
     return resultData
   },
 
