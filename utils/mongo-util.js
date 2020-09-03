@@ -25,13 +25,12 @@ exports.list = async (ctx, mongoDB, sort) => {
             mongoDB.countDocumentsAsync()
         ])
         var totalPage = Math.ceil(total / limit)
-        ctx.body = list
-        // ctx.success({
-        //     list,
-        //     total,
-        //     hasNext: totalPage > page ? 1 : 0,
-        //     hasPrev: page > 1 ? 1 : 0
-        // })
+        ctx.rest({
+            list,
+            total,
+            hasNext: totalPage > page ? 1 : 0,
+            hasPrev: page > 1 ? 1 : 0
+        })
     } catch (err) {
         console.log(err)
         // ctx.error(null, err.toString())
