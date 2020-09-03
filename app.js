@@ -39,7 +39,7 @@ const app = new Koa();
 // }
 
 // unjucks模板的reder方法添加到app.context上
-const templating = require('./middleware/templating');
+const templating = require('./middlewares/templating');
 // 把render添加在app.context上
 templating('views', {
     noCache: !isProduction,
@@ -50,11 +50,11 @@ templating('views', {
 // generator中间件开发
 // generator中间件在koa v2中需要用koa-convert封装一下才能使用
 // const convert = require('koa-convert')
-// const loggerGenerator  = require('./middleware/logger-generator')
+// const loggerGenerator  = require('./middlewares/logger-generator')
 // app.use(convert(loggerGenerator()))
 
 // async中间件开发
-// const loggerAsync = require('./middleware/logger-async')
+// const loggerAsync = require('./middlewares/logger-async')
 // app.use(loggerAsync())
 
 app.use(logger())
@@ -75,7 +75,7 @@ app.use(logger())
 // 生产环境下，静态文件是由部署在最前面的反向代理服务器（如Nginx）处理的，Node程序不需要处理静态文件。
 // 而在开发环境下，我们希望koa能顺带处理静态文件，否则，就必须手动配置一个反向代理服务器，这样会导致开发环境非常复杂。
 if (!isProduction) {
-    let staticFiles = require('./middleware/static-files');
+    let staticFiles = require('./middlewares/static-files');
     app.use(staticFiles('/static/', __dirname + '/static'));
     // app.use(staticFiles('/dist/', __dirname + '/dist'));
 }
@@ -115,15 +115,12 @@ app.use(bodyParser())
 // )
 // ************************************************************************
 
-// 其他中间件
+// **************rest中间件*************************************************
 // rest中间件
-// const rest = require('./middleware/rest');
+const rest = require('./middlewares/rest');
 // bind .rest() for ctx:
 // app.use(rest.restify());
-
-// 数据库
-// const { query } = require('./mysql/async-db')
-
+// ************************************************************************
 
 // **************ajax 跨域问题**********************************************
 // jsonp
@@ -163,12 +160,10 @@ app.use(jsonp())
 //     }
 // })
 // ************************************************************************
-
-
 // 返回封装
-// app.use(require('./server/middlewares/return'))
-// app.use(rest.restify())
 
+app.use(rest.restify())
+// app.use(require('./server/middlewares/return'))
 // app.use(proxy(app))
 
 
@@ -184,7 +179,7 @@ app.use(jsonp())
  * 遍历每个mapping 自动添加router router.get(path, mapping[url])
  */
 // 扫描注册Controller，并添加router:
-const router = require('./middleware/controller')(__dirname + '/controllers');
+const router = require('./middlewares/controller')(__dirname + '/controllers');
 app.use(router.routes()).use(router.allowedMethods())
 
 // app.use(controller.generateRouter(path.join(__dirname, 'server/controllers')))
@@ -205,7 +200,7 @@ app.use(router.routes()).use(router.allowedMethods())
 //     ctx.body = body;
 // });
 
-// // add router middleware:
+// // add router middlewares:
 // app.use(router.routes());
 
 

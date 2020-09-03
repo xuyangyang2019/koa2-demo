@@ -1,4 +1,4 @@
-const APIError = require('../middleware/rest').APIError;
+const APIError = require('../middlewares/rest').APIError;
 const userService = require('../services/userService')
 const adminService = require('../services/adminService')
 
