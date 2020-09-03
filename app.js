@@ -118,8 +118,12 @@ app.use(bodyParser())
 // **************rest中间件*************************************************
 // rest中间件
 const rest = require('./middlewares/rest');
-// bind .rest() for ctx:
-// app.use(rest.restify());
+app.use(rest.restify());
+
+// 返回封装
+// app.use(require('./server/middlewares/return'))
+// app.use(proxy(app))
+
 // ************************************************************************
 
 // **************ajax 跨域问题**********************************************
@@ -160,11 +164,6 @@ app.use(jsonp())
 //     }
 // })
 // ************************************************************************
-// 返回封装
-
-app.use(rest.restify())
-// app.use(require('./server/middlewares/return'))
-// app.use(proxy(app))
 
 
 // **************最后一个middleware处理URL路由*******************************
